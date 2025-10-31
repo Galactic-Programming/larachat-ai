@@ -22,6 +22,10 @@ import {
     Menu,
     Loader2,
     Download,
+    Briefcase,
+    Code,
+    MessageCircle,
+    HelpCircle,
 } from 'lucide-react';
 
 interface ChatHeaderProps {
@@ -35,6 +39,8 @@ interface ChatHeaderProps {
     onToggleSidebar?: () => void;
     showSidebarToggle?: boolean;
     aiFeatureLoading?: 'summary' | 'topics' | 'category' | null;
+    topics?: string[];
+    category?: string;
     className?: string;
 }
 
@@ -49,8 +55,26 @@ export function ChatHeader({
     onToggleSidebar,
     showSidebarToggle = false,
     aiFeatureLoading = null,
+    topics = [],
+    category,
     className,
 }: ChatHeaderProps) {
+    const getCategoryIcon = (cat?: string) => {
+        if (!cat) return null;
+        const lower = cat.toLowerCase();
+        if (lower.includes('work') || lower.includes('business')) return <Briefcase className="size-3" />;
+        if (lower.includes('tech') || lower.includes('code')) return <Code className="size-3" />;
+        if (lower.includes('personal') || lower.includes('chat')) return <MessageCircle className="size-3" />;
+        return <HelpCircle className="size-3" />;
+    };
+
+    const getCategoryVariant = (cat?: string): 'default' | 'secondary' | 'outline' => {
+        if (!cat) return 'secondary';
+        const lower = cat.toLowerCase();
+        if (lower.includes('work') || lower.includes('business')) return 'default';
+        if (lower.includes('tech') || lower.includes('code')) return 'outline';
+        return 'secondary';
+    };
     return (
         <div className={cn('flex items-center justify-between border-b bg-background p-4', className)}>
             {/* Left: Title */}
@@ -72,7 +96,7 @@ export function ChatHeader({
                         {conversation?.title || 'Select a conversation'}
                     </h1>
                     {conversation && (
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
                             <span>{conversation.messages?.length || 0} messages</span>
                             {conversation.status === 'processing' && (
                                 <>
@@ -84,6 +108,36 @@ export function ChatHeader({
                                         </span>
                                         Processing
                                     </Badge>
+                                </>
+                            )}
+                            {category && (
+                                <>
+                                    <span>•</span>
+                                    <Badge variant={getCategoryVariant(category)} className="gap-1 text-xs">
+                                        {getCategoryIcon(category)}
+                                        {category}
+                                    </Badge>
+                                </>
+                            )}
+                            {topics.length > 0 && (
+                                <>
+                                    <span>•</span>
+                                    <div className="flex items-center gap-1 flex-wrap">
+                                        {topics.slice(0, 3).map((topic, idx) => (
+                                            <Badge
+                                                key={idx}
+                                                variant="outline"
+                                                className="text-xs px-1.5 py-0"
+                                            >
+                                                {topic}
+                                            </Badge>
+                                        ))}
+                                        {topics.length > 3 && (
+                                            <span className="text-xs text-muted-foreground">
+                                                +{topics.length - 3} more
+                                            </span>
+                                        )}
+                                    </div>
                                 </>
                             )}
                         </div>

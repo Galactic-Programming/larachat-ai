@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { cn } from '@/lib/utils';
 import type { Conversation } from '@/types/chat';
 import { formatMessageTime, getConversationPreview } from '@/lib/chat-utils';
@@ -25,7 +26,7 @@ interface ConversationItemProps {
     searchQuery?: string;
 }
 
-export function ConversationItem({
+function ConversationItemComponent({
     conversation,
     isActive = false,
     isDeleting = false,
@@ -141,3 +142,18 @@ export function ConversationItem({
         </div>
     );
 }
+
+// Memoize with custom comparison to prevent unnecessary re-renders
+export const ConversationItem = memo(ConversationItemComponent, (prevProps, nextProps) => {
+    return (
+        prevProps.conversation.id === nextProps.conversation.id &&
+        prevProps.conversation.title === nextProps.conversation.title &&
+        prevProps.conversation.updated_at === nextProps.conversation.updated_at &&
+        prevProps.isActive === nextProps.isActive &&
+        prevProps.isDeleting === nextProps.isDeleting &&
+        prevProps.searchQuery === nextProps.searchQuery &&
+        prevProps.conversation.messages?.length === nextProps.conversation.messages?.length
+    );
+});
+
+ConversationItem.displayName = 'ConversationItem';

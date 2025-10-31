@@ -3,6 +3,7 @@ import { Head } from '@inertiajs/react';
 import { cn } from '@/lib/utils';
 import axios from '@/lib/axios';
 import { exportAsJSON, exportAsMarkdown, exportAsText } from '@/lib/export-utils';
+import { toast } from 'sonner';
 import type {
     GenerateSummaryResponse,
     ExtractTopicsResponse,
@@ -15,6 +16,8 @@ import {
     ChatInput,
     EmptyState,
 } from '@/components/chat';
+import { SummaryModal } from '@/components/chat/summary-modal';
+import { ErrorBoundary } from '@/components/error-boundary';
 import { useConversations } from '@/hooks/use-conversations';
 import { useChat } from '@/hooks/use-chat';
 
@@ -30,6 +33,8 @@ export default function ChatIndex() {
         topics?: string[];
         category?: string;
     }>({});
+    const [summaryModalOpen, setSummaryModalOpen] = useState(false);
+    const [currentSummary, setCurrentSummary] = useState('');
 
     const {
         conversations,
@@ -121,14 +126,22 @@ export default function ChatIndex() {
             );
 
             if (response.data.success) {
-                alert(`Summary:\n\n${response.data.summary}`);
                 // Store for export
                 setExportMetadata((prev) => ({ ...prev, summary: response.data.summary }));
-                // TODO: Display in a modal or toast instead of alert
+                // Store for modal display
+                setCurrentSummary(response.data.summary);
+                // Show success toast with action
+                toast.success('Summary generated successfully', {
+                    action: {
+                        label: 'View',
+                        onClick: () => setSummaryModalOpen(true),
+                    },
+                    duration: 5000,
+                });
             }
         } catch (error) {
             console.error('Failed to generate summary:', error);
-            alert('Failed to generate summary. Please try again.');
+            toast.error('Failed to generate summary. Please try again.');
         } finally {
             setAiFeatureLoading(null);
         }
@@ -144,14 +157,16 @@ export default function ChatIndex() {
             );
 
             if (response.data.success) {
-                alert(`Topics:\n\n${response.data.topics.join(', ')}`);
                 // Store for export
                 setExportMetadata((prev) => ({ ...prev, topics: response.data.topics }));
-                // TODO: Display as badges in the UI
+                // Show topics in toast
+                toast.success(`Topics extracted: ${response.data.topics.join(', ')}`, {
+                    duration: 5000,
+                });
             }
         } catch (error) {
             console.error('Failed to extract topics:', error);
-            alert('Failed to extract topics. Please try again.');
+            toast.error('Failed to extract topics. Please try again.');
         } finally {
             setAiFeatureLoading(null);
         }
@@ -167,14 +182,16 @@ export default function ChatIndex() {
             );
 
             if (response.data.success) {
-                alert(`Category: ${response.data.category}`);
                 // Store for export
                 setExportMetadata((prev) => ({ ...prev, category: response.data.category }));
-                // TODO: Display with icon/color in the UI
+                // Show category in toast
+                toast.success(`Categorized as: ${response.data.category}`, {
+                    duration: 4000,
+                });
             }
         } catch (error) {
             console.error('Failed to categorize:', error);
-            alert('Failed to categorize. Please try again.');
+            toast.error('Failed to categorize. Please try again.');
         } finally {
             setAiFeatureLoading(null);
         }
@@ -221,45 +238,53 @@ export default function ChatIndex() {
                         sidebarOpen ? 'translate-x-0' : '-translate-x-full',
                     )}
                 >
-                    <ChatSidebar
-                        conversations={conversations}
-                        activeConversationId={selectedConversationId ?? undefined}
-                        onSelectConversation={(id) => {
-                            setSelectedConversationId(id);
-                            // Auto-close sidebar on mobile after selection
-                            if (window.innerWidth < 1024) {
-                                setSidebarOpen(false);
-                            }
-                        }}
-                        onNewConversation={handleNewConversation}
-                        onDeleteConversation={handleDeleteConversation}
-                        deletingId={deletingId}
-                        isLoading={conversationsLoading}
-                    />
+                    <ErrorBoundary>
+                        <ChatSidebar
+                            conversations={conversations}
+                            activeConversationId={selectedConversationId ?? undefined}
+                            onSelectConversation={(id) => {
+                                setSelectedConversationId(id);
+                                // Auto-close sidebar on mobile after selection
+                                if (window.innerWidth < 1024) {
+                                    setSidebarOpen(false);
+                                }
+                            }}
+                            onNewConversation={handleNewConversation}
+                            onDeleteConversation={handleDeleteConversation}
+                            deletingId={deletingId}
+                            isLoading={conversationsLoading}
+                        />
+                    </ErrorBoundary>
                 </div>
 
                 {/* Main Chat Area */}
                 <div className="flex flex-1 flex-col overflow-hidden">
                     {selectedConversationId && conversation ? (
                         <>
-                            <ChatHeader
-                                conversation={conversation}
-                                onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-                                showSidebarToggle
-                                onRefresh={handleRefresh}
-                                onGenerateSummary={handleGenerateSummary}
-                                onExtractTopics={handleExtractTopics}
-                                onCategorize={handleCategorize}
-                                onExport={handleExport}
-                                aiFeatureLoading={aiFeatureLoading}
-                                onDelete={() => handleDeleteConversation(conversation.id)}
-                            />
+                            <ErrorBoundary>
+                                <ChatHeader
+                                    conversation={conversation}
+                                    onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+                                    showSidebarToggle
+                                    onRefresh={handleRefresh}
+                                    onGenerateSummary={handleGenerateSummary}
+                                    onExtractTopics={handleExtractTopics}
+                                    onCategorize={handleCategorize}
+                                    onExport={handleExport}
+                                    aiFeatureLoading={aiFeatureLoading}
+                                    onDelete={() => handleDeleteConversation(conversation.id)}
+                                    topics={exportMetadata.topics}
+                                    category={exportMetadata.category}
+                                />
+                            </ErrorBoundary>
 
-                            <MessageList
-                                messages={messages}
-                                isProcessing={isProcessing}
-                                conversationStatus={status}
-                            />
+                            <ErrorBoundary>
+                                <MessageList
+                                    messages={messages}
+                                    isProcessing={isProcessing}
+                                    conversationStatus={status}
+                                />
+                            </ErrorBoundary>
 
                             <ChatInput
                                 onSend={handleSendMessage}
@@ -310,6 +335,14 @@ export default function ChatIndex() {
                     )}
                 </div>
             </div>
+
+            {/* Summary Modal */}
+            <SummaryModal
+                open={summaryModalOpen}
+                onOpenChange={setSummaryModalOpen}
+                summary={currentSummary}
+                conversationTitle={conversation?.title || 'Untitled'}
+            />
         </>
     );
 }
