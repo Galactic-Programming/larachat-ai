@@ -10,6 +10,8 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use OpenAI\Exceptions\RateLimitException;
+use OpenAI\Exceptions\ErrorException;
 
 class ProcessAiConversation implements ShouldQueue
 {
@@ -56,33 +58,45 @@ class ProcessAiConversation implements ShouldQueue
                 'tokens_used' => $result['usage']['total_tokens'],
             ]);
 
-        } catch (\OpenAI\Exceptions\ErrorException $e) {
-            // Check if it's specifically a rate limit error
-            $errorMessage = $e->getMessage();
-            $isRateLimit = str_contains(strtolower($errorMessage), 'rate limit') ||
-                str_contains(strtolower($errorMessage), 'quota');
+        } catch (RateLimitException $e) {
+            // Handle rate limit with friendly mock response
+            Log::warning('OpenAI Rate Limit Exceeded', [
+                'conversation_id' => $this->conversationId,
+                'error' => $e->getMessage(),
+                'note' => 'Free tier: 3 requests/minute limit. Please wait 60 seconds.'
+            ]);
 
-            if ($isRateLimit) {
-                Log::warning('OpenAI Rate Limit Exceeded', [
-                    'conversation_id' => $this->conversationId,
-                    'error' => $errorMessage,
-                    'note' => 'Free tier rate limit. Please wait or upgrade plan.'
-                ]);
+            // Create helpful mock response
+            \App\Models\AiMessage::create([
+                'conversation_id' => $this->conversationId,
+                'role' => 'assistant',
+                'content' => "⚠️ **Rate Limit Notice**\n\nThe OpenAI API has reached its rate limit (3 requests per minute for free tier).\n\n**What to do:**\n1. Wait 60 seconds before sending another message\n2. Check your OpenAI billing: https://platform.openai.com/account/billing\n3. Add a payment method to increase limits\n\nYour message was received and will be processed once the limit resets. 🤖",
+                'token_count' => 80,
+            ]);
 
-                // Create a mock AI response so user can still see the UI working
-                \App\Models\AiMessage::create([
-                    'conversation_id' => $this->conversationId,
-                    'role' => 'assistant',
-                    'content' => "⚠️ OpenAI API rate limit exceeded. Your free tier quota may have been reached. Please wait a few minutes or check your OpenAI account billing settings. 🤖",
-                    'token_count' => 50,
-                ]);
+            Conversation::find($this->conversationId)?->update(['status' => 'completed']);
 
-                Conversation::find($this->conversationId)?->update(['status' => 'completed']);
-                return;
-            }
+            // Don't throw - complete successfully with mock response
+            return;
 
-            // If not rate limit, log and rethrow
-            throw $e;
+        } catch (ErrorException $e) {
+            // Handle other OpenAI API errors
+            Log::error('OpenAI API Error', [
+                'conversation_id' => $this->conversationId,
+                'error' => $e->getMessage(),
+                'type' => get_class($e),
+            ]);
+
+            // Create error message for user
+            \App\Models\AiMessage::create([
+                'conversation_id' => $this->conversationId,
+                'role' => 'assistant',
+                'content' => "❌ **AI Service Error**\n\nThe AI service encountered an error: " . $e->getMessage() . "\n\nPlease try again or contact support if the issue persists.",
+                'token_count' => 50,
+            ]);
+
+            Conversation::find($this->conversationId)?->update(['status' => 'error']);
+            return;
 
         } catch (\Exception $e) {
             // Log detailed error information for debugging

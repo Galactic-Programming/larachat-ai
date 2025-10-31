@@ -192,11 +192,27 @@ export function useChat({
                     }
                 }
             } catch (err) {
-                // Remove optimistic message on error
-                setMessages((prev) => {
-                    const filtered = prev.filter((msg) => msg.id !== optimisticMessage.id);
-                    return filtered;
-                });
+                // Don't remove optimistic message - backend may have saved it!
+                // Instead, refresh conversation to get real data from DB
+                console.warn('Send message error, refreshing conversation...', err);
+
+                // Refresh to sync with backend state
+                try {
+                    const conversationResponse = await axios.get<ConversationResponse>(
+                        `/api/conversations/${conversationId}`,
+                    );
+
+                    if (conversationResponse.data.success) {
+                        setConversation(conversationResponse.data.conversation);
+                        setMessages(conversationResponse.data.conversation.messages || []);
+                        setStatus(conversationResponse.data.conversation.status);
+                    }
+                } catch (refreshErr) {
+                    console.error('Failed to refresh after error:', refreshErr);
+                    // If refresh fails, remove optimistic message as last resort
+                    setMessages((prev) => prev.filter((msg) => msg.id !== optimisticMessage.id));
+                }
+
                 handleError(err);
             } finally {
                 setIsSending(false);
