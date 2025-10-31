@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 import type { Conversation } from '@/types/chat';
 import { formatMessageTime, getConversationPreview } from '@/lib/chat-utils';
-import { MessageSquare, Trash2 } from 'lucide-react';
+import { MessageSquare, Trash2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { HighlightedText } from '@/components/ui/highlighted-text';
 import {
@@ -19,6 +19,7 @@ import {
 interface ConversationItemProps {
     conversation: Conversation;
     isActive?: boolean;
+    isDeleting?: boolean;
     onClick?: () => void;
     onDelete?: () => void;
     searchQuery?: string;
@@ -27,6 +28,7 @@ interface ConversationItemProps {
 export function ConversationItem({
     conversation,
     isActive = false,
+    isDeleting = false,
     onClick,
     onDelete,
     searchQuery = '',
@@ -39,6 +41,7 @@ export function ConversationItem({
             className={cn(
                 'group relative flex cursor-pointer flex-col gap-2 rounded-lg border p-3 transition-colors hover:bg-accent',
                 isActive && 'border-primary bg-accent',
+                isDeleting && 'pointer-events-none opacity-50',
             )}
             onClick={onClick}
         >
@@ -64,11 +67,16 @@ export function ConversationItem({
                                 size="icon"
                                 className="size-6 shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
                                 onClick={(e) => e.stopPropagation()}
+                                disabled={isDeleting}
                             >
-                                <Trash2 className="size-3 text-destructive" />
+                                {isDeleting ? (
+                                    <Loader2 className="size-3 animate-spin text-destructive" />
+                                ) : (
+                                    <Trash2 className="size-3 text-destructive" />
+                                )}
                             </Button>
                         </AlertDialogTrigger>
-                        <AlertDialogContent>
+                        <AlertDialogContent onEscapeKeyDown={(e) => !isDeleting && e.preventDefault()}>
                             <AlertDialogHeader>
                                 <AlertDialogTitle>Delete Conversation?</AlertDialogTitle>
                                 <AlertDialogDescription>
@@ -77,15 +85,23 @@ export function ConversationItem({
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
                                 <AlertDialogAction
                                     onClick={(e: React.MouseEvent) => {
                                         e.stopPropagation();
                                         onDelete();
                                     }}
-                                    className="bg-destructive text-white hover:bg-destructive/90"
+                                    disabled={isDeleting}
+                                    className="bg-destructive text-white hover:bg-destructive/90 disabled:opacity-50"
                                 >
-                                    Delete
+                                    {isDeleting ? (
+                                        <>
+                                            <Loader2 className="mr-2 size-4 animate-spin" />
+                                            Deleting...
+                                        </>
+                                    ) : (
+                                        'Delete'
+                                    )}
                                 </AlertDialogAction>
                             </AlertDialogFooter>
                         </AlertDialogContent>

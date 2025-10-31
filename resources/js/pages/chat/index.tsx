@@ -13,6 +13,7 @@ import { useChat } from '@/hooks/use-chat';
 export default function ChatIndex() {
     const [selectedConversationId, setSelectedConversationId] = useState<number | null>(null);
     const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [deletingId, setDeletingId] = useState<number | null>(null);
 
     const {
         conversations,
@@ -59,6 +60,7 @@ export default function ChatIndex() {
     };
 
     const handleDeleteConversation = async (id: number) => {
+        setDeletingId(id);
         try {
             await deleteConversation(id);
 
@@ -69,6 +71,8 @@ export default function ChatIndex() {
             }
         } catch (error) {
             console.error('Failed to delete conversation:', error);
+        } finally {
+            setDeletingId(null);
         }
     };
 
@@ -126,6 +130,7 @@ export default function ChatIndex() {
                             onSelectConversation={setSelectedConversationId}
                             onNewConversation={handleNewConversation}
                             onDeleteConversation={handleDeleteConversation}
+                            deletingId={deletingId}
                             isLoading={conversationsLoading}
                         />
                     )}
