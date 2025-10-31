@@ -1,9 +1,13 @@
 import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
-import { useState } from 'react';
-import { router } from '@inertiajs/react';
+import { useState, useEffect } from 'react';
+import { router, usePage } from '@inertiajs/react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { useAIModels } from '@/hooks/use-ai-models';
+import { Loader2 } from 'lucide-react';
+import type { AIModelName } from '@/types/chat';
+import { toast } from 'sonner';
 
 interface Props {
     settings: {
@@ -14,10 +18,38 @@ interface Props {
 }
 
 export default function AiSettings({ settings }: Props) {
-    const [model, setModel] = useState(settings.model);
+    // Fetch available models from API
+    const { models: availableModelsData, defaultModel, availableModels, isLoading } = useAIModels();
+
+    // Get flash messages from Inertia
+    const page = usePage();
+    const flash = (page.props as Record<string, unknown>).flash as { success?: string; error?: string } | undefined;
+
+    // Use default model if settings.model is not available, otherwise use settings
+    const initialModel = availableModels.length > 0 && !availableModels.includes(settings.model as AIModelName)
+        ? (defaultModel || settings.model)
+        : settings.model;
+
+    const [model, setModel] = useState(initialModel);
     const [temperature, setTemperature] = useState(settings.temperature);
     const [maxTokens, setMaxTokens] = useState(settings.max_tokens);
     const [saving, setSaving] = useState(false);
+
+    // Show toast when flash message is set
+    useEffect(() => {
+        if (flash?.success) {
+            toast.success(flash.success);
+        }
+        if (flash?.error) {
+            toast.error(flash.error);
+        }
+    }, [flash]);
+
+    // Get model details for display
+    const getModelInfo = (modelKey: string) => {
+        if (!availableModelsData?.models) return null;
+        return availableModelsData.models[modelKey as AIModelName];
+    };
 
     const handleSave = () => {
         setSaving(true);
@@ -56,15 +88,38 @@ export default function AiSettings({ settings }: Props) {
                             onChange={(e) => setModel(e.target.value)}
                             className="w-full rounded-md border bg-background px-3 py-2"
                             aria-label="AI Model Selection"
+                            disabled={isLoading}
                         >
-                            <option value="gpt-4o-mini">GPT-4o Mini (Fast & Cost-effective)</option>
-                            <option value="gpt-4o">GPT-4o (Advanced)</option>
-                            <option value="gpt-4-turbo">GPT-4 Turbo (Most Capable)</option>
+                            {isLoading ? (
+                                <option>Loading models...</option>
+                            ) : availableModels.length > 0 ? (
+                                availableModels.map((modelKey) => {
+                                    const modelInfo = getModelInfo(modelKey);
+                                    return (
+                                        <option key={modelKey} value={modelKey}>
+                                            {modelInfo?.name || modelKey} - {modelInfo?.description || ''}
+                                        </option>
+                                    );
+                                })
+                            ) : (
+                                <>
+                                    <option value="gpt-4.1-nano">GPT-4.1 Nano (Laravel Demo - Testing)</option>
+                                    <option value="gpt-4o-mini">GPT-4o Mini (Fast & Cost-effective)</option>
+                                    <option value="gpt-4o">GPT-4o (Advanced)</option>
+                                    <option value="gpt-4-turbo">GPT-4 Turbo (Most Capable)</option>
+                                </>
+                            )}
                         </select>
                         <p className="text-sm text-muted-foreground">
                             Choose the AI model to use. More advanced models provide better responses but may be
                             slower.
                         </p>
+                        {isLoading && (
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                Loading available models...
+                            </div>
+                        )}
                     </div>
 
                     {/* Temperature */}
@@ -118,15 +173,23 @@ export default function AiSettings({ settings }: Props) {
                         </h3>
                         <ul className="space-y-1 text-sm text-blue-800 dark:text-blue-200">
                             <li>
-                                <strong>For precise answers:</strong> Temperature 0.1-0.3, GPT-4o Mini
+                                <strong>For precise answers:</strong> Temperature 0.1-0.3, {defaultModel || 'GPT-4o Mini'}
                             </li>
                             <li>
                                 <strong>For creative writing:</strong> Temperature 0.7-0.9, GPT-4o
                             </li>
                             <li>
-                                <strong>For balanced responses:</strong> Temperature 0.5, GPT-4o Mini
+                                <strong>For balanced responses:</strong> Temperature 0.5, {defaultModel || 'GPT-4o Mini'}
                             </li>
                         </ul>
+                        {defaultModel === 'gpt-4.1-nano' && (
+                            <div className="mt-3 rounded border border-yellow-300 bg-yellow-50 p-2 dark:border-yellow-700 dark:bg-yellow-900/20">
+                                <p className="text-xs text-yellow-800 dark:text-yellow-200">
+                                    <strong>Note:</strong> Currently testing GPT-4.1 Nano (Laravel demo model).
+                                    This model may be beta/partner-only.
+                                </p>
+                            </div>
+                        )}
                     </div>
 
                     {/* Save Button */}

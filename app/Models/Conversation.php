@@ -69,7 +69,7 @@ class Conversation extends Model
 
             try {
                 $result = OpenAI::chat()->create([
-                    'model' => 'gpt-4o-mini',
+                    'model' => 'gpt-4.1-nano', // Testing Laravel demo model
                     'messages' => [
                         [
                             'role' => 'system',
@@ -121,7 +121,7 @@ class Conversation extends Model
 
         try {
             $result = OpenAI::chat()->create([
-                'model' => 'gpt-4o-mini',
+                'model' => 'gpt-4.1-nano', // Testing Laravel demo model
                 'messages' => [
                     [
                         'role' => 'system',
@@ -173,7 +173,7 @@ class Conversation extends Model
 
         try {
             $result = OpenAI::chat()->create([
-                'model' => 'gpt-4o-mini',
+                'model' => 'gpt-4.1-nano', // Testing Laravel demo model
                 'messages' => [
                     [
                         'role' => 'system',
@@ -224,7 +224,7 @@ class Conversation extends Model
 
         try {
             $result = OpenAI::chat()->create([
-                'model' => 'gpt-4o-mini',
+                'model' => 'gpt-4.1-nano', // Testing Laravel demo model
                 'messages' => [
                     [
                         'role' => 'system',

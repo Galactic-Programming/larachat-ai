@@ -56,30 +56,43 @@ class ProcessAiConversation implements ShouldQueue
                 'tokens_used' => $result['usage']['total_tokens'],
             ]);
 
-        } catch (\OpenAI\Exceptions\RateLimitException $e) {
-            // Handle Rate Limit specifically with a mock response
-            Log::warning('OpenAI Rate Limit - Using mock response', [
-                'conversation_id' => $this->conversationId,
-            ]);
+        } catch (\OpenAI\Exceptions\ErrorException $e) {
+            // Check if it's specifically a rate limit error
+            $errorMessage = $e->getMessage();
+            $isRateLimit = str_contains(strtolower($errorMessage), 'rate limit') ||
+                str_contains(strtolower($errorMessage), 'quota');
 
-            // Create a mock AI response so user can still see the UI working
-            \App\Models\AiMessage::create([
-                'conversation_id' => $this->conversationId,
-                'role' => 'assistant',
-                'content' => "Appologies! The OpenAI API has reached its rate limit. This is an automatic message. Please try again later. 🤖",
-                'token_count' => 50,
-            ]);
+            if ($isRateLimit) {
+                Log::warning('OpenAI Rate Limit Exceeded', [
+                    'conversation_id' => $this->conversationId,
+                    'error' => $errorMessage,
+                    'note' => 'Free tier rate limit. Please wait or upgrade plan.'
+                ]);
 
-            Conversation::find($this->conversationId)?->update(['status' => 'completed']);
+                // Create a mock AI response so user can still see the UI working
+                \App\Models\AiMessage::create([
+                    'conversation_id' => $this->conversationId,
+                    'role' => 'assistant',
+                    'content' => "⚠️ OpenAI API rate limit exceeded. Your free tier quota may have been reached. Please wait a few minutes or check your OpenAI account billing settings. 🤖",
+                    'token_count' => 50,
+                ]);
 
-            // Don't throw - let it complete successfully with mock response
-            return;
+                Conversation::find($this->conversationId)?->update(['status' => 'completed']);
+                return;
+            }
+
+            // If not rate limit, log and rethrow
+            throw $e;
 
         } catch (\Exception $e) {
+            // Log detailed error information for debugging
             Log::error('AI conversation processing failed', [
                 'conversation_id' => $this->conversationId,
                 'error' => $e->getMessage(),
                 'type' => get_class($e),
+                'code' => $e->getCode(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
             ]);
 
             // Update conversation status to error (valid status from migration)

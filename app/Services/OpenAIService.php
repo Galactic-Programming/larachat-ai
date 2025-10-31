@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 
 class OpenAIService
 {
-    private string $model = 'gpt-4o-mini';
+    private string $model = 'gpt-4.1-nano'; // Changed to Laravel demo model for testing
     private float $temperature = 0.3;
     private int $maxTokens = 1500;
 
@@ -192,13 +192,15 @@ class OpenAIService
      */
     private function calculateCost(array $usage): float
     {
-        // Pricing for gpt-4o-mini (as of 2024)
+        // Pricing for gpt-4.1-nano (Laravel demo model - pricing unknown, using estimated values)
+        // Assuming similar to gpt-4o-mini for now
         // Input: $0.15 per 1M tokens = $0.00015 per 1K tokens
         // Output: $0.60 per 1M tokens = $0.0006 per 1K tokens
         $promptCostPer1k = 0.00015;
         $completionCostPer1k = 0.0006;
 
         // If using other models, adjust pricing:
+        // gpt-4o-mini: $0.15/$0.60 per 1M tokens
         // gpt-4o: $2.50/$10.00 per 1M tokens
         // gpt-4-turbo: $10.00/$30.00 per 1M tokens
 

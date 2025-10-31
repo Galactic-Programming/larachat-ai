@@ -8,6 +8,25 @@ export type MessageRole = 'user' | 'assistant' | 'system';
 
 export type ConversationStatus = 'active' | 'processing' | 'completed' | 'error';
 
+export type AIModelName = 'gpt-4.1-nano' | 'gpt-4o-mini' | 'gpt-4o' | 'gpt-4-turbo';
+
+export interface AIModel {
+    name: string;
+    description: string;
+    enabled: boolean;
+    pricing?: {
+        input: number;  // per 1K tokens
+        output: number; // per 1K tokens
+    };
+    max_tokens?: number;
+    context_window?: number;
+}
+
+export interface AIModelsResponse {
+    default_model: AIModelName;
+    models: Record<AIModelName, AIModel>;
+}
+
 export interface Message {
     id: number;
     conversation_id: number;

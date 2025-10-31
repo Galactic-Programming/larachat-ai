@@ -7,3 +7,4 @@ export { EmptyState } from './empty-state';
 export { ConversationItem } from './conversation-item';
 export { ChatSidebar } from './chat-sidebar';
 export { ChatHeader } from './chat-header';
+export { ModelIndicator } from './model-indicator';

@@ -15,3 +15,4 @@ export { useTwoFactorAuth } from './use-two-factor-auth';
 export { useChat } from './use-chat';
 export { useConversations } from './use-conversations';
 export { usePolling } from './use-polling';
+export { useAIModels } from './use-ai-models';

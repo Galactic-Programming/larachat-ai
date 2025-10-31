@@ -27,6 +27,7 @@ import {
     MessageCircle,
     HelpCircle,
 } from 'lucide-react';
+import { ModelIndicator } from './model-indicator';
 
 interface ChatHeaderProps {
     conversation?: Conversation | null;
@@ -110,6 +111,8 @@ export function ChatHeader({
                                     </Badge>
                                 </>
                             )}
+                            <span>•</span>
+                            <ModelIndicator />
                             {category && (
                                 <>
                                     <span>•</span>

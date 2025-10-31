@@ -15,8 +15,8 @@ class AiSettingsController extends Controller
     public function index(): Response
     {
         $settings = [
-            'model' => session('ai_model', config('openai.default_model', 'gpt-4o-mini')),
-            'temperature' => session('ai_temperature', 0.3),
+            'model' => session('ai_model', config('ai.default_model', 'gpt-4.1-nano')),
+            'temperature' => session('ai_temperature', config('ai.temperature.default', 0.3)),
             'max_tokens' => session('ai_max_tokens', 1500),
         ];
 
@@ -30,8 +30,16 @@ class AiSettingsController extends Controller
      */
     public function update(Request $request)
     {
+        // Get available models from config
+        $availableModels = array_keys(config('ai.models', []));
+
+        // If no models in config, use defaults including gpt-4.1-nano
+        if (empty($availableModels)) {
+            $availableModels = ['gpt-4.1-nano', 'gpt-4o-mini', 'gpt-4o', 'gpt-4-turbo'];
+        }
+
         $validated = $request->validate([
-            'model' => 'required|string|in:gpt-4o-mini,gpt-4o,gpt-4-turbo',
+            'model' => 'required|string|in:' . implode(',', $availableModels),
             'temperature' => 'required|numeric|min:0|max:1',
             'max_tokens' => 'required|integer|min:100|max:4000',
         ]);

@@ -19,4 +19,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/conversations/{id}/summary', [AiChatController::class, 'generateSummary']);
     Route::post('/conversations/{id}/topics', [AiChatController::class, 'extractTopics']);
     Route::post('/conversations/{id}/categorize', [AiChatController::class, 'categorizeConversation']);
+
+    // AI Models Configuration
+    Route::get('/ai/models', function () {
+        return response()->json([
+            'default_model' => config('ai.default_model'),
+            'models' => collect(config('ai.models'))->filter(fn($model) => $model['enabled'])->toArray(),
+        ]);
+    });
 });
