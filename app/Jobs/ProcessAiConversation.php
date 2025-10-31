@@ -56,6 +56,25 @@ class ProcessAiConversation implements ShouldQueue
                 'tokens_used' => $result['usage']['total_tokens'],
             ]);
 
+        } catch (\OpenAI\Exceptions\RateLimitException $e) {
+            // Handle Rate Limit specifically with a mock response
+            Log::warning('OpenAI Rate Limit - Using mock response', [
+                'conversation_id' => $this->conversationId,
+            ]);
+
+            // Create a mock AI response so user can still see the UI working
+            \App\Models\AiMessage::create([
+                'conversation_id' => $this->conversationId,
+                'role' => 'assistant',
+                'content' => "Appologies! The OpenAI API has reached its rate limit. This is an automatic message. Please try again later. 🤖",
+                'token_count' => 50,
+            ]);
+
+            Conversation::find($this->conversationId)?->update(['status' => 'completed']);
+
+            // Don't throw - let it complete successfully with mock response
+            return;
+
         } catch (\Exception $e) {
             Log::error('AI conversation processing failed', [
                 'conversation_id' => $this->conversationId,
@@ -63,8 +82,8 @@ class ProcessAiConversation implements ShouldQueue
                 'type' => get_class($e),
             ]);
 
-            // Update conversation status to failed (not 'error' - frontend expects 'failed')
-            Conversation::find($this->conversationId)?->update(['status' => 'failed']);
+            // Update conversation status to error (valid status from migration)
+            Conversation::find($this->conversationId)?->update(['status' => 'error']);
 
             // Re-throw to trigger Laravel's retry mechanism
             throw $e;

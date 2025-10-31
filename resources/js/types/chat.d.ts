@@ -6,7 +6,7 @@
 
 export type MessageRole = 'user' | 'assistant' | 'system';
 
-export type ConversationStatus = 'active' | 'processing' | 'completed' | 'failed';
+export type ConversationStatus = 'active' | 'processing' | 'completed' | 'error';
 
 export interface Message {
     id: number;

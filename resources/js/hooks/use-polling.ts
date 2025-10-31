@@ -36,10 +36,10 @@ export function usePolling({
                 onUpdate(response.data);
             }
 
-            // Stop polling if conversation is completed or failed
+            // Stop polling if conversation is completed or error
             if (
                 response.data.status === 'completed' ||
-                response.data.status === 'failed'
+                response.data.status === 'error'
             ) {
                 stopPolling();
             }

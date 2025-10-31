@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 
 class OpenAIService
 {
-    private string $model = 'gpt-4.1-nano';
+    private string $model = 'gpt-4o-mini';
     private float $temperature = 0.3;
     private int $maxTokens = 1500;
 
@@ -192,14 +192,15 @@ class OpenAIService
      */
     private function calculateCost(array $usage): float
     {
-        // Pricing for gpt-4.1-nano (example - adjust to actual pricing)
-        // For free tier models, cost is 0
-        $promptCostPer1k = 0.0; // Free tier
-        $completionCostPer1k = 0.0; // Free tier
+        // Pricing for gpt-4o-mini (as of 2024)
+        // Input: $0.15 per 1M tokens = $0.00015 per 1K tokens
+        // Output: $0.60 per 1M tokens = $0.0006 per 1K tokens
+        $promptCostPer1k = 0.00015;
+        $completionCostPer1k = 0.0006;
 
-        // If using paid models, uncomment and adjust:
-        // $promptCostPer1k = 0.01; // GPT-4 Turbo example
-        // $completionCostPer1k = 0.03;
+        // If using other models, adjust pricing:
+        // gpt-4o: $2.50/$10.00 per 1M tokens
+        // gpt-4-turbo: $10.00/$30.00 per 1M tokens
 
         $promptCost = ($usage['prompt_tokens'] / 1000) * $promptCostPer1k;
         $completionCost = ($usage['completion_tokens'] / 1000) * $completionCostPer1k;
