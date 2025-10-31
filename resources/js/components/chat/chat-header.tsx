@@ -17,6 +17,7 @@ import {
     Trash2,
     RotateCcw,
     Menu,
+    Loader2,
 } from 'lucide-react';
 
 interface ChatHeaderProps {
@@ -28,6 +29,7 @@ interface ChatHeaderProps {
     onRefresh?: () => void;
     onToggleSidebar?: () => void;
     showSidebarToggle?: boolean;
+    aiFeatureLoading?: 'summary' | 'topics' | 'category' | null;
     className?: string;
 }
 
@@ -40,6 +42,7 @@ export function ChatHeader({
     onRefresh,
     onToggleSidebar,
     showSidebarToggle = false,
+    aiFeatureLoading = null,
     className,
 }: ChatHeaderProps) {
     return (
@@ -50,8 +53,9 @@ export function ChatHeader({
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="lg:hidden"
+                        className="size-11 lg:hidden"
                         onClick={onToggleSidebar}
+                        aria-label="Toggle sidebar"
                     >
                         <Menu className="size-5" />
                     </Button>
@@ -86,7 +90,14 @@ export function ChatHeader({
                 <div className="flex items-center gap-2">
                     {/* Refresh Button */}
                     {onRefresh && (
-                        <Button variant="ghost" size="icon" onClick={onRefresh} title="Refresh">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={onRefresh}
+                            title="Refresh"
+                            className="size-11"
+                            aria-label="Refresh conversation"
+                        >
                             <RotateCcw className="size-4" />
                         </Button>
                     )}
@@ -94,27 +105,48 @@ export function ChatHeader({
                     {/* More Actions Menu */}
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
+                            <Button variant="ghost" size="icon" className="size-11" aria-label="More actions">
                                 <MoreVertical className="size-4" />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-56">
                             {/* AI Features */}
                             {onGenerateSummary && (
-                                <DropdownMenuItem onClick={onGenerateSummary}>
-                                    <FileText className="mr-2 size-4" />
+                                <DropdownMenuItem
+                                    onClick={onGenerateSummary}
+                                    disabled={!!aiFeatureLoading}
+                                >
+                                    {aiFeatureLoading === 'summary' ? (
+                                        <Loader2 className="mr-2 size-4 animate-spin" />
+                                    ) : (
+                                        <FileText className="mr-2 size-4" />
+                                    )}
                                     Generate Summary
                                 </DropdownMenuItem>
                             )}
                             {onExtractTopics && (
-                                <DropdownMenuItem onClick={onExtractTopics}>
-                                    <Tags className="mr-2 size-4" />
+                                <DropdownMenuItem
+                                    onClick={onExtractTopics}
+                                    disabled={!!aiFeatureLoading}
+                                >
+                                    {aiFeatureLoading === 'topics' ? (
+                                        <Loader2 className="mr-2 size-4 animate-spin" />
+                                    ) : (
+                                        <Tags className="mr-2 size-4" />
+                                    )}
                                     Extract Topics
                                 </DropdownMenuItem>
                             )}
                             {onCategorize && (
-                                <DropdownMenuItem onClick={onCategorize}>
-                                    <Sparkles className="mr-2 size-4" />
+                                <DropdownMenuItem
+                                    onClick={onCategorize}
+                                    disabled={!!aiFeatureLoading}
+                                >
+                                    {aiFeatureLoading === 'category' ? (
+                                        <Loader2 className="mr-2 size-4 animate-spin" />
+                                    ) : (
+                                        <Sparkles className="mr-2 size-4" />
+                                    )}
                                     Categorize
                                 </DropdownMenuItem>
                             )}

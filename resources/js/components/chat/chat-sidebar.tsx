@@ -70,7 +70,7 @@ export function ChatSidebar({
                 <div className="mb-3 flex items-center justify-between">
                     <h2 className="text-lg font-semibold">Conversations</h2>
                     {onNewConversation && (
-                        <Button size="sm" onClick={onNewConversation}>
+                        <Button size="sm" onClick={onNewConversation} className="h-11">
                             <Plus className="mr-2 size-4" />
                             New
                         </Button>
@@ -85,16 +85,17 @@ export function ChatSidebar({
                         placeholder="Search conversations..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-9 pr-9"
+                        className="h-11 pl-9 pr-11"
                     />
                     {searchQuery && (
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="absolute right-1 top-1/2 size-7 -translate-y-1/2"
+                            className="absolute right-1 top-1/2 size-9 -translate-y-1/2"
                             onClick={() => setSearchQuery('')}
+                            aria-label="Clear search"
                         >
-                            <X className="size-3" />
+                            <X className="size-4" />
                         </Button>
                     )}
                 </div>
@@ -102,7 +103,7 @@ export function ChatSidebar({
                 {/* Filter & Sort */}
                 <div className="flex gap-2">
                     <Select value={statusFilter} onValueChange={setStatusFilter}>
-                        <SelectTrigger className="flex-1">
+                        <SelectTrigger className="h-11 flex-1">
                             <Filter className="mr-2 size-4" />
                             <SelectValue placeholder="Status" />
                         </SelectTrigger>
@@ -116,7 +117,7 @@ export function ChatSidebar({
                     </Select>
 
                     <Select value={sortBy} onValueChange={setSortBy}>
-                        <SelectTrigger className="flex-1">
+                        <SelectTrigger className="h-11 flex-1">
                             <ArrowUpDown className="mr-2 size-4" />
                             <SelectValue placeholder="Sort" />
                         </SelectTrigger>

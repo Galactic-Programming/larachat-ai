@@ -14,4 +14,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Message sending with rate limiting
     Route::post('/conversations/{id}/messages', [AiChatController::class, 'sendMessage'])
         ->middleware('ai.rate');
+
+    // AI-Enhanced Features
+    Route::post('/conversations/{id}/summary', [AiChatController::class, 'generateSummary']);
+    Route::post('/conversations/{id}/topics', [AiChatController::class, 'extractTopics']);
+    Route::post('/conversations/{id}/categorize', [AiChatController::class, 'categorizeConversation']);
 });

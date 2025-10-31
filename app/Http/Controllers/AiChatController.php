@@ -164,4 +164,55 @@ class AiChatController extends Controller
             'message' => 'Conversation deleted successfully',
         ]);
     }
+
+    /**
+     * Generate conversation summary
+     */
+    public function generateSummary(int $conversationId): JsonResponse
+    {
+        $conversation = Conversation::where('id', $conversationId)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        $summary = $conversation->generateSummary();
+
+        return response()->json([
+            'success' => true,
+            'summary' => $summary,
+        ]);
+    }
+
+    /**
+     * Extract conversation topics
+     */
+    public function extractTopics(int $conversationId): JsonResponse
+    {
+        $conversation = Conversation::where('id', $conversationId)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        $topics = $conversation->extractTopics();
+
+        return response()->json([
+            'success' => true,
+            'topics' => $topics,
+        ]);
+    }
+
+    /**
+     * Categorize conversation
+     */
+    public function categorizeConversation(int $conversationId): JsonResponse
+    {
+        $conversation = Conversation::where('id', $conversationId)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        $category = $conversation->categorize();
+
+        return response()->json([
+            'success' => true,
+            'category' => $category,
+        ]);
+    }
 }

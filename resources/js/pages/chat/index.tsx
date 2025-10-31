@@ -1,5 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Head } from '@inertiajs/react';
+import { cn } from '@/lib/utils';
+import axios from '@/lib/axios';
+import type {
+    GenerateSummaryResponse,
+    ExtractTopicsResponse,
+    CategorizeResponse,
+} from '@/types/chat';
 import {
     ChatSidebar,
     ChatHeader,
@@ -14,6 +21,9 @@ export default function ChatIndex() {
     const [selectedConversationId, setSelectedConversationId] = useState<number | null>(null);
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [deletingId, setDeletingId] = useState<number | null>(null);
+    const [aiFeatureLoading, setAiFeatureLoading] = useState<
+        'summary' | 'topics' | 'category' | null
+    >(null);
 
     const {
         conversations,
@@ -94,20 +104,68 @@ export default function ChatIndex() {
         refreshConversations();
     };
 
-    // AI-enhanced features - will implement in next step
-    const handleGenerateSummary = () => {
-        console.log('Generate summary for conversation:', selectedConversationId);
-        // TODO: Call API endpoint
+    // AI-enhanced features
+    const handleGenerateSummary = async () => {
+        if (!selectedConversationId) return;
+
+        setAiFeatureLoading('summary');
+        try {
+            const response = await axios.post<GenerateSummaryResponse>(
+                `/api/conversations/${selectedConversationId}/summary`,
+            );
+
+            if (response.data.success) {
+                alert(`Summary:\n\n${response.data.summary}`);
+                // TODO: Display in a modal or toast instead of alert
+            }
+        } catch (error) {
+            console.error('Failed to generate summary:', error);
+            alert('Failed to generate summary. Please try again.');
+        } finally {
+            setAiFeatureLoading(null);
+        }
     };
 
-    const handleExtractTopics = () => {
-        console.log('Extract topics for conversation:', selectedConversationId);
-        // TODO: Call API endpoint
+    const handleExtractTopics = async () => {
+        if (!selectedConversationId) return;
+
+        setAiFeatureLoading('topics');
+        try {
+            const response = await axios.post<ExtractTopicsResponse>(
+                `/api/conversations/${selectedConversationId}/topics`,
+            );
+
+            if (response.data.success) {
+                alert(`Topics:\n\n${response.data.topics.join(', ')}`);
+                // TODO: Display as badges in the UI
+            }
+        } catch (error) {
+            console.error('Failed to extract topics:', error);
+            alert('Failed to extract topics. Please try again.');
+        } finally {
+            setAiFeatureLoading(null);
+        }
     };
 
-    const handleCategorize = () => {
-        console.log('Categorize conversation:', selectedConversationId);
-        // TODO: Call API endpoint
+    const handleCategorize = async () => {
+        if (!selectedConversationId) return;
+
+        setAiFeatureLoading('category');
+        try {
+            const response = await axios.post<CategorizeResponse>(
+                `/api/conversations/${selectedConversationId}/categorize`,
+            );
+
+            if (response.data.success) {
+                alert(`Category: ${response.data.category}`);
+                // TODO: Display with icon/color in the UI
+            }
+        } catch (error) {
+            console.error('Failed to categorize:', error);
+            alert('Failed to categorize. Please try again.');
+        } finally {
+            setAiFeatureLoading(null);
+        }
     };
 
     // FIXED: Use status from hook instead of conversation.status
@@ -118,22 +176,37 @@ export default function ChatIndex() {
             <Head title="AI Chat" />
 
             <div className="flex h-screen overflow-hidden bg-background">
+                {/* Mobile Backdrop Overlay */}
+                {sidebarOpen && (
+                    <div
+                        className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+                        onClick={() => setSidebarOpen(false)}
+                        aria-hidden="true"
+                    />
+                )}
+
                 {/* Sidebar */}
                 <div
-                    className={`${sidebarOpen ? 'w-80' : 'w-0'
-                        } transition-all duration-300 lg:w-80`}
-                >
-                    {sidebarOpen && (
-                        <ChatSidebar
-                            conversations={conversations}
-                            activeConversationId={selectedConversationId ?? undefined}
-                            onSelectConversation={setSelectedConversationId}
-                            onNewConversation={handleNewConversation}
-                            onDeleteConversation={handleDeleteConversation}
-                            deletingId={deletingId}
-                            isLoading={conversationsLoading}
-                        />
+                    className={cn(
+                        'fixed inset-y-0 left-0 z-50 w-80 transform transition-transform duration-300 lg:relative lg:z-auto lg:translate-x-0',
+                        sidebarOpen ? 'translate-x-0' : '-translate-x-full',
                     )}
+                >
+                    <ChatSidebar
+                        conversations={conversations}
+                        activeConversationId={selectedConversationId ?? undefined}
+                        onSelectConversation={(id) => {
+                            setSelectedConversationId(id);
+                            // Auto-close sidebar on mobile after selection
+                            if (window.innerWidth < 1024) {
+                                setSidebarOpen(false);
+                            }
+                        }}
+                        onNewConversation={handleNewConversation}
+                        onDeleteConversation={handleDeleteConversation}
+                        deletingId={deletingId}
+                        isLoading={conversationsLoading}
+                    />
                 </div>
 
                 {/* Main Chat Area */}
@@ -148,6 +221,7 @@ export default function ChatIndex() {
                                 onGenerateSummary={handleGenerateSummary}
                                 onExtractTopics={handleExtractTopics}
                                 onCategorize={handleCategorize}
+                                aiFeatureLoading={aiFeatureLoading}
                                 onDelete={() => handleDeleteConversation(conversation.id)}
                             />
 

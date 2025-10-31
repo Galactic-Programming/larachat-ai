@@ -39,11 +39,19 @@ export function ConversationItem({
     return (
         <div
             className={cn(
-                'group relative flex cursor-pointer flex-col gap-2 rounded-lg border p-3 transition-colors hover:bg-accent',
+                'group relative flex cursor-pointer flex-col gap-2 rounded-lg border p-3 transition-colors hover:bg-accent md:p-3',
                 isActive && 'border-primary bg-accent',
                 isDeleting && 'pointer-events-none opacity-50',
             )}
             onClick={onClick}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onClick?.();
+                }
+            }}
         >
             {/* Header */}
             <div className="flex items-start justify-between gap-2">
@@ -65,14 +73,15 @@ export function ConversationItem({
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="size-6 shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
+                                className="size-9 shrink-0 opacity-0 transition-opacity group-hover:opacity-100 md:size-8"
                                 onClick={(e) => e.stopPropagation()}
                                 disabled={isDeleting}
+                                aria-label="Delete conversation"
                             >
                                 {isDeleting ? (
-                                    <Loader2 className="size-3 animate-spin text-destructive" />
+                                    <Loader2 className="size-4 animate-spin text-destructive" />
                                 ) : (
-                                    <Trash2 className="size-3 text-destructive" />
+                                    <Trash2 className="size-4 text-destructive" />
                                 )}
                             </Button>
                         </AlertDialogTrigger>
