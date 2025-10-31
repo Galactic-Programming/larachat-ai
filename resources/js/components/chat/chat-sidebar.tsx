@@ -6,7 +6,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, Search, X } from 'lucide-react';
+import { Plus, Search, X, Filter, ArrowUpDown } from 'lucide-react';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 
 interface ChatSidebarProps {
     conversations: Conversation[];
@@ -28,11 +35,31 @@ export function ChatSidebar({
     className,
 }: ChatSidebarProps) {
     const [searchQuery, setSearchQuery] = useState('');
+    const [statusFilter, setStatusFilter] = useState<string>('all');
+    const [sortBy, setSortBy] = useState<string>('date-desc');
 
-    // Filter conversations by search query
-    const filteredConversations = conversations.filter((conv) =>
-        conv.title.toLowerCase().includes(searchQuery.toLowerCase()),
-    );
+    // Filter and sort conversations
+    let filteredConversations = conversations.filter((conv) => {
+        const matchesSearch = conv.title.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesStatus = statusFilter === 'all' || conv.status === statusFilter;
+        return matchesSearch && matchesStatus;
+    });
+
+    // Sort conversations
+    filteredConversations = [...filteredConversations].sort((a, b) => {
+        switch (sortBy) {
+            case 'date-desc':
+                return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+            case 'date-asc':
+                return new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime();
+            case 'title-asc':
+                return a.title.localeCompare(b.title);
+            case 'title-desc':
+                return b.title.localeCompare(a.title);
+            default:
+                return 0;
+        }
+    });
 
     return (
         <div className={cn('flex h-full flex-col border-r bg-muted/10', className)}>
@@ -49,7 +76,7 @@ export function ChatSidebar({
                 </div>
 
                 {/* Search */}
-                <div className="relative">
+                <div className="relative mb-3">
                     <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
                         type="text"
@@ -68,6 +95,36 @@ export function ChatSidebar({
                             <X className="size-3" />
                         </Button>
                     )}
+                </div>
+
+                {/* Filter & Sort */}
+                <div className="flex gap-2">
+                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                        <SelectTrigger className="flex-1">
+                            <Filter className="mr-2 size-4" />
+                            <SelectValue placeholder="Status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Status</SelectItem>
+                            <SelectItem value="active">Active</SelectItem>
+                            <SelectItem value="processing">Processing</SelectItem>
+                            <SelectItem value="completed">Completed</SelectItem>
+                            <SelectItem value="failed">Failed</SelectItem>
+                        </SelectContent>
+                    </Select>
+
+                    <Select value={sortBy} onValueChange={setSortBy}>
+                        <SelectTrigger className="flex-1">
+                            <ArrowUpDown className="mr-2 size-4" />
+                            <SelectValue placeholder="Sort" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="date-desc">Latest First</SelectItem>
+                            <SelectItem value="date-asc">Oldest First</SelectItem>
+                            <SelectItem value="title-asc">Title (A-Z)</SelectItem>
+                            <SelectItem value="title-desc">Title (Z-A)</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
             </div>
 
@@ -111,6 +168,7 @@ export function ChatSidebar({
                                         ? () => onDeleteConversation(conversation.id)
                                         : undefined
                                 }
+                                searchQuery={searchQuery}
                             />
                         ))
                     )}

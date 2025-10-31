@@ -3,6 +3,7 @@ import type { Conversation } from '@/types/chat';
 import { formatMessageTime, getConversationPreview } from '@/lib/chat-utils';
 import { MessageSquare, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { HighlightedText } from '@/components/ui/highlighted-text';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -20,6 +21,7 @@ interface ConversationItemProps {
     isActive?: boolean;
     onClick?: () => void;
     onDelete?: () => void;
+    searchQuery?: string;
 }
 
 export function ConversationItem({
@@ -27,6 +29,7 @@ export function ConversationItem({
     isActive = false,
     onClick,
     onDelete,
+    searchQuery = '',
 }: ConversationItemProps) {
     const preview = getConversationPreview(conversation.messages || []);
     const messageCount = conversation.messages?.length || 0;
@@ -46,7 +49,9 @@ export function ConversationItem({
                         <MessageSquare className="size-4 text-muted-foreground" />
                     </div>
                     <div className="min-w-0 flex-1">
-                        <h3 className="truncate text-sm font-semibold">{conversation.title}</h3>
+                        <h3 className="truncate text-sm font-semibold">
+                            <HighlightedText text={conversation.title} query={searchQuery} />
+                        </h3>
                     </div>
                 </div>
 
