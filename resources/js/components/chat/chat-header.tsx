@@ -7,6 +7,9 @@ import {
     DropdownMenuItem,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
+    DropdownMenuSub,
+    DropdownMenuSubContent,
+    DropdownMenuSubTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -18,6 +21,7 @@ import {
     RotateCcw,
     Menu,
     Loader2,
+    Download,
 } from 'lucide-react';
 
 interface ChatHeaderProps {
@@ -25,6 +29,7 @@ interface ChatHeaderProps {
     onGenerateSummary?: () => void;
     onExtractTopics?: () => void;
     onCategorize?: () => void;
+    onExport?: (format: 'json' | 'markdown' | 'text') => void;
     onDelete?: () => void;
     onRefresh?: () => void;
     onToggleSidebar?: () => void;
@@ -38,6 +43,7 @@ export function ChatHeader({
     onGenerateSummary,
     onExtractTopics,
     onCategorize,
+    onExport,
     onDelete,
     onRefresh,
     onToggleSidebar,
@@ -151,9 +157,35 @@ export function ChatHeader({
                                 </DropdownMenuItem>
                             )}
 
-                            {(onGenerateSummary || onExtractTopics || onCategorize) && onDelete && (
+                            {(onGenerateSummary || onExtractTopics || onCategorize) && (onExport || onDelete) && (
                                 <DropdownMenuSeparator />
                             )}
+
+                            {/* Export */}
+                            {onExport && (
+                                <DropdownMenuSub>
+                                    <DropdownMenuSubTrigger>
+                                        <Download className="mr-2 size-4" />
+                                        Export
+                                    </DropdownMenuSubTrigger>
+                                    <DropdownMenuSubContent>
+                                        <DropdownMenuItem onClick={() => onExport('json')}>
+                                            <FileText className="mr-2 size-4" />
+                                            JSON
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => onExport('markdown')}>
+                                            <FileText className="mr-2 size-4" />
+                                            Markdown
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => onExport('text')}>
+                                            <FileText className="mr-2 size-4" />
+                                            Plain Text
+                                        </DropdownMenuItem>
+                                    </DropdownMenuSubContent>
+                                </DropdownMenuSub>
+                            )}
+
+                            {onExport && onDelete && <DropdownMenuSeparator />}
 
                             {/* Delete */}
                             {onDelete && (

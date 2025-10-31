@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Head } from '@inertiajs/react';
 import { cn } from '@/lib/utils';
 import axios from '@/lib/axios';
+import { exportAsJSON, exportAsMarkdown, exportAsText } from '@/lib/export-utils';
 import type {
     GenerateSummaryResponse,
     ExtractTopicsResponse,
@@ -24,6 +25,11 @@ export default function ChatIndex() {
     const [aiFeatureLoading, setAiFeatureLoading] = useState<
         'summary' | 'topics' | 'category' | null
     >(null);
+    const [exportMetadata, setExportMetadata] = useState<{
+        summary?: string;
+        topics?: string[];
+        category?: string;
+    }>({});
 
     const {
         conversations,
@@ -116,6 +122,8 @@ export default function ChatIndex() {
 
             if (response.data.success) {
                 alert(`Summary:\n\n${response.data.summary}`);
+                // Store for export
+                setExportMetadata((prev) => ({ ...prev, summary: response.data.summary }));
                 // TODO: Display in a modal or toast instead of alert
             }
         } catch (error) {
@@ -137,6 +145,8 @@ export default function ChatIndex() {
 
             if (response.data.success) {
                 alert(`Topics:\n\n${response.data.topics.join(', ')}`);
+                // Store for export
+                setExportMetadata((prev) => ({ ...prev, topics: response.data.topics }));
                 // TODO: Display as badges in the UI
             }
         } catch (error) {
@@ -158,6 +168,8 @@ export default function ChatIndex() {
 
             if (response.data.success) {
                 alert(`Category: ${response.data.category}`);
+                // Store for export
+                setExportMetadata((prev) => ({ ...prev, category: response.data.category }));
                 // TODO: Display with icon/color in the UI
             }
         } catch (error) {
@@ -165,6 +177,23 @@ export default function ChatIndex() {
             alert('Failed to categorize. Please try again.');
         } finally {
             setAiFeatureLoading(null);
+        }
+    };
+
+    // Export conversation handler
+    const handleExport = (format: 'json' | 'markdown' | 'text') => {
+        if (!conversation) return;
+
+        switch (format) {
+            case 'json':
+                exportAsJSON(conversation, exportMetadata);
+                break;
+            case 'markdown':
+                exportAsMarkdown(conversation, exportMetadata);
+                break;
+            case 'text':
+                exportAsText(conversation, exportMetadata);
+                break;
         }
     };
 
@@ -221,6 +250,7 @@ export default function ChatIndex() {
                                 onGenerateSummary={handleGenerateSummary}
                                 onExtractTopics={handleExtractTopics}
                                 onCategorize={handleCategorize}
+                                onExport={handleExport}
                                 aiFeatureLoading={aiFeatureLoading}
                                 onDelete={() => handleDeleteConversation(conversation.id)}
                             />
