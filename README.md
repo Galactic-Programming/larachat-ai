@@ -69,10 +69,14 @@ Visit `http://127.0.0.1:8000` and register to start chatting!
 
 ## 📖 Documentation
 
-- [Setup Guide](./SETUP.md) - Complete installation and configuration guide
-- [Architecture Overview] (#architecture-overview) - How the application works
-- [API Documentation] (#api-endpoints) - Backend API reference
-- [Frontend Components](#frontend-structure) - React components guide
+- **[📚 Full Documentation](./docs/README.md)** - Complete project documentation index
+- **[Setup Guide](./SETUP.md)** - Installation and configuration guide
+- **[Foundation Complete](./docs/FOUNDATION_COMPLETE.md)** - Phase 1-4A development summary
+- **[Task #10 Summary](./docs/TASK-10-COMPLETION-SUMMARY.md)** - Final polish implementation details
+- **[AI Configuration](./docs/AI_CONFIGURATION.md)** - OpenAI API setup and configuration
+- **[Architecture Overview](`#architecture-overview`)** - How the application works
+- **[API Documentation](`#api-endpoints`)** - Backend API reference
+- **[Frontend Components](#frontend-structure)** - React components guide
 
 ## 🏗️ Architecture Overview
 
