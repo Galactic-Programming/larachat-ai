@@ -2,7 +2,7 @@
  * Export utilities for conversation data
  */
 
-import type { Conversation, Message } from '@/types/chat';
+import type { Conversation } from '@/types/chat';
 
 interface ExportMetadata {
     summary?: string;
