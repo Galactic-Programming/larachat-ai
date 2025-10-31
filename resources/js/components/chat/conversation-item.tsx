@@ -1,8 +1,10 @@
+import { memo } from 'react';
 import { cn } from '@/lib/utils';
 import type { Conversation } from '@/types/chat';
 import { formatMessageTime, getConversationPreview } from '@/lib/chat-utils';
-import { MessageSquare, Trash2 } from 'lucide-react';
+import { MessageSquare, Trash2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { HighlightedText } from '@/components/ui/highlighted-text';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -18,15 +20,19 @@ import {
 interface ConversationItemProps {
     conversation: Conversation;
     isActive?: boolean;
+    isDeleting?: boolean;
     onClick?: () => void;
     onDelete?: () => void;
+    searchQuery?: string;
 }
 
-export function ConversationItem({
+function ConversationItemComponent({
     conversation,
     isActive = false,
+    isDeleting = false,
     onClick,
     onDelete,
+    searchQuery = '',
 }: ConversationItemProps) {
     const preview = getConversationPreview(conversation.messages || []);
     const messageCount = conversation.messages?.length || 0;
@@ -34,10 +40,19 @@ export function ConversationItem({
     return (
         <div
             className={cn(
-                'group relative flex cursor-pointer flex-col gap-2 rounded-lg border p-3 transition-colors hover:bg-accent',
+                'group relative flex cursor-pointer flex-col gap-2 rounded-lg border p-3 transition-colors hover:bg-accent md:p-3',
                 isActive && 'border-primary bg-accent',
+                isDeleting && 'pointer-events-none opacity-50',
             )}
             onClick={onClick}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onClick?.();
+                }
+            }}
         >
             {/* Header */}
             <div className="flex items-start justify-between gap-2">
@@ -46,7 +61,9 @@ export function ConversationItem({
                         <MessageSquare className="size-4 text-muted-foreground" />
                     </div>
                     <div className="min-w-0 flex-1">
-                        <h3 className="truncate text-sm font-semibold">{conversation.title}</h3>
+                        <h3 className="truncate text-sm font-semibold">
+                            <HighlightedText text={conversation.title} query={searchQuery} />
+                        </h3>
                     </div>
                 </div>
 
@@ -57,13 +74,19 @@ export function ConversationItem({
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="size-6 shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
+                                className="size-9 shrink-0 opacity-0 transition-opacity group-hover:opacity-100 md:size-8"
                                 onClick={(e) => e.stopPropagation()}
+                                disabled={isDeleting}
+                                aria-label="Delete conversation"
                             >
-                                <Trash2 className="size-3 text-destructive" />
+                                {isDeleting ? (
+                                    <Loader2 className="size-4 animate-spin text-destructive" />
+                                ) : (
+                                    <Trash2 className="size-4 text-destructive" />
+                                )}
                             </Button>
                         </AlertDialogTrigger>
-                        <AlertDialogContent>
+                        <AlertDialogContent onEscapeKeyDown={(e) => !isDeleting && e.preventDefault()}>
                             <AlertDialogHeader>
                                 <AlertDialogTitle>Delete Conversation?</AlertDialogTitle>
                                 <AlertDialogDescription>
@@ -72,15 +95,23 @@ export function ConversationItem({
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
                                 <AlertDialogAction
                                     onClick={(e: React.MouseEvent) => {
                                         e.stopPropagation();
                                         onDelete();
                                     }}
-                                    className="bg-destructive text-white hover:bg-destructive/90"
+                                    disabled={isDeleting}
+                                    className="bg-destructive text-white hover:bg-destructive/90 disabled:opacity-50"
                                 >
-                                    Delete
+                                    {isDeleting ? (
+                                        <>
+                                            <Loader2 className="mr-2 size-4 animate-spin" />
+                                            Deleting...
+                                        </>
+                                    ) : (
+                                        'Delete'
+                                    )}
                                 </AlertDialogAction>
                             </AlertDialogFooter>
                         </AlertDialogContent>
@@ -111,3 +142,18 @@ export function ConversationItem({
         </div>
     );
 }
+
+// Memoize with custom comparison to prevent unnecessary re-renders
+export const ConversationItem = memo(ConversationItemComponent, (prevProps, nextProps) => {
+    return (
+        prevProps.conversation.id === nextProps.conversation.id &&
+        prevProps.conversation.title === nextProps.conversation.title &&
+        prevProps.conversation.updated_at === nextProps.conversation.updated_at &&
+        prevProps.isActive === nextProps.isActive &&
+        prevProps.isDeleting === nextProps.isDeleting &&
+        prevProps.searchQuery === nextProps.searchQuery &&
+        prevProps.conversation.messages?.length === nextProps.conversation.messages?.length
+    );
+});
+
+ConversationItem.displayName = 'ConversationItem';

@@ -72,13 +72,13 @@ export function ChatInput({
                         type="submit"
                         size="icon"
                         disabled={!canSend}
-                        className="size-10 shrink-0"
+                        className="size-11 shrink-0"
                         aria-label="Send message"
                     >
                         {disabled ? (
-                            <Loader2 className="size-4 animate-spin" />
+                            <Loader2 className="size-5 animate-spin" />
                         ) : (
-                            <Send className="size-4" />
+                            <Send className="size-5" />
                         )}
                     </Button>
                 </div>

@@ -1,5 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Head } from '@inertiajs/react';
+import { cn } from '@/lib/utils';
+import axios from '@/lib/axios';
+import { exportAsJSON, exportAsMarkdown, exportAsText } from '@/lib/export-utils';
+import { toast } from 'sonner';
+import type {
+    GenerateSummaryResponse,
+    ExtractTopicsResponse,
+    CategorizeResponse,
+} from '@/types/chat';
 import {
     ChatSidebar,
     ChatHeader,
@@ -7,12 +16,25 @@ import {
     ChatInput,
     EmptyState,
 } from '@/components/chat';
+import { SummaryModal } from '@/components/chat/summary-modal';
+import { ErrorBoundary } from '@/components/error-boundary';
 import { useConversations } from '@/hooks/use-conversations';
 import { useChat } from '@/hooks/use-chat';
 
 export default function ChatIndex() {
     const [selectedConversationId, setSelectedConversationId] = useState<number | null>(null);
     const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [deletingId, setDeletingId] = useState<number | null>(null);
+    const [aiFeatureLoading, setAiFeatureLoading] = useState<
+        'summary' | 'topics' | 'category' | null
+    >(null);
+    const [exportMetadata, setExportMetadata] = useState<{
+        summary?: string;
+        topics?: string[];
+        category?: string;
+    }>({});
+    const [summaryModalOpen, setSummaryModalOpen] = useState(false);
+    const [currentSummary, setCurrentSummary] = useState('');
 
     const {
         conversations,
@@ -59,6 +81,7 @@ export default function ChatIndex() {
     };
 
     const handleDeleteConversation = async (id: number) => {
+        setDeletingId(id);
         try {
             await deleteConversation(id);
 
@@ -69,6 +92,8 @@ export default function ChatIndex() {
             }
         } catch (error) {
             console.error('Failed to delete conversation:', error);
+        } finally {
+            setDeletingId(null);
         }
     };
 
@@ -90,20 +115,103 @@ export default function ChatIndex() {
         refreshConversations();
     };
 
-    // AI-enhanced features - will implement in next step
-    const handleGenerateSummary = () => {
-        console.log('Generate summary for conversation:', selectedConversationId);
-        // TODO: Call API endpoint
+    // AI-enhanced features
+    const handleGenerateSummary = async () => {
+        if (!selectedConversationId) return;
+
+        setAiFeatureLoading('summary');
+        try {
+            const response = await axios.post<GenerateSummaryResponse>(
+                `/api/conversations/${selectedConversationId}/summary`,
+            );
+
+            if (response.data.success) {
+                // Store for export
+                setExportMetadata((prev) => ({ ...prev, summary: response.data.summary }));
+                // Store for modal display
+                setCurrentSummary(response.data.summary);
+                // Show success toast with action
+                toast.success('Summary generated successfully', {
+                    action: {
+                        label: 'View',
+                        onClick: () => setSummaryModalOpen(true),
+                    },
+                    duration: 5000,
+                });
+            }
+        } catch (error) {
+            console.error('Failed to generate summary:', error);
+            toast.error('Failed to generate summary. Please try again.');
+        } finally {
+            setAiFeatureLoading(null);
+        }
     };
 
-    const handleExtractTopics = () => {
-        console.log('Extract topics for conversation:', selectedConversationId);
-        // TODO: Call API endpoint
+    const handleExtractTopics = async () => {
+        if (!selectedConversationId) return;
+
+        setAiFeatureLoading('topics');
+        try {
+            const response = await axios.post<ExtractTopicsResponse>(
+                `/api/conversations/${selectedConversationId}/topics`,
+            );
+
+            if (response.data.success) {
+                // Store for export
+                setExportMetadata((prev) => ({ ...prev, topics: response.data.topics }));
+                // Show topics in toast
+                toast.success(`Topics extracted: ${response.data.topics.join(', ')}`, {
+                    duration: 5000,
+                });
+            }
+        } catch (error) {
+            console.error('Failed to extract topics:', error);
+            toast.error('Failed to extract topics. Please try again.');
+        } finally {
+            setAiFeatureLoading(null);
+        }
     };
 
-    const handleCategorize = () => {
-        console.log('Categorize conversation:', selectedConversationId);
-        // TODO: Call API endpoint
+    const handleCategorize = async () => {
+        if (!selectedConversationId) return;
+
+        setAiFeatureLoading('category');
+        try {
+            const response = await axios.post<CategorizeResponse>(
+                `/api/conversations/${selectedConversationId}/categorize`,
+            );
+
+            if (response.data.success) {
+                // Store for export
+                setExportMetadata((prev) => ({ ...prev, category: response.data.category }));
+                // Show category in toast
+                toast.success(`Categorized as: ${response.data.category}`, {
+                    duration: 4000,
+                });
+            }
+        } catch (error) {
+            console.error('Failed to categorize:', error);
+            toast.error('Failed to categorize. Please try again.');
+        } finally {
+            setAiFeatureLoading(null);
+        }
+    };
+
+    // Export conversation handler
+    const handleExport = (format: 'json' | 'markdown' | 'text') => {
+        if (!conversation) return;
+
+        switch (format) {
+            case 'json':
+                exportAsJSON(conversation, exportMetadata);
+                break;
+            case 'markdown':
+                exportAsMarkdown(conversation, exportMetadata);
+                break;
+            case 'text':
+                exportAsText(conversation, exportMetadata);
+                break;
+        }
     };
 
     // FIXED: Use status from hook instead of conversation.status
@@ -114,43 +222,69 @@ export default function ChatIndex() {
             <Head title="AI Chat" />
 
             <div className="flex h-screen overflow-hidden bg-background">
+                {/* Mobile Backdrop Overlay */}
+                {sidebarOpen && (
+                    <div
+                        className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+                        onClick={() => setSidebarOpen(false)}
+                        aria-hidden="true"
+                    />
+                )}
+
                 {/* Sidebar */}
                 <div
-                    className={`${sidebarOpen ? 'w-80' : 'w-0'
-                        } transition-all duration-300 lg:w-80`}
+                    className={cn(
+                        'fixed inset-y-0 left-0 z-50 w-80 transform transition-transform duration-300 lg:relative lg:z-auto lg:translate-x-0',
+                        sidebarOpen ? 'translate-x-0' : '-translate-x-full',
+                    )}
                 >
-                    {sidebarOpen && (
+                    <ErrorBoundary>
                         <ChatSidebar
                             conversations={conversations}
                             activeConversationId={selectedConversationId ?? undefined}
-                            onSelectConversation={setSelectedConversationId}
+                            onSelectConversation={(id) => {
+                                setSelectedConversationId(id);
+                                // Auto-close sidebar on mobile after selection
+                                if (window.innerWidth < 1024) {
+                                    setSidebarOpen(false);
+                                }
+                            }}
                             onNewConversation={handleNewConversation}
                             onDeleteConversation={handleDeleteConversation}
+                            deletingId={deletingId}
                             isLoading={conversationsLoading}
                         />
-                    )}
+                    </ErrorBoundary>
                 </div>
 
                 {/* Main Chat Area */}
                 <div className="flex flex-1 flex-col overflow-hidden">
                     {selectedConversationId && conversation ? (
                         <>
-                            <ChatHeader
-                                conversation={conversation}
-                                onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-                                showSidebarToggle
-                                onRefresh={handleRefresh}
-                                onGenerateSummary={handleGenerateSummary}
-                                onExtractTopics={handleExtractTopics}
-                                onCategorize={handleCategorize}
-                                onDelete={() => handleDeleteConversation(conversation.id)}
-                            />
+                            <ErrorBoundary>
+                                <ChatHeader
+                                    conversation={conversation}
+                                    onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+                                    showSidebarToggle
+                                    onRefresh={handleRefresh}
+                                    onGenerateSummary={handleGenerateSummary}
+                                    onExtractTopics={handleExtractTopics}
+                                    onCategorize={handleCategorize}
+                                    onExport={handleExport}
+                                    aiFeatureLoading={aiFeatureLoading}
+                                    onDelete={() => handleDeleteConversation(conversation.id)}
+                                    topics={exportMetadata.topics}
+                                    category={exportMetadata.category}
+                                />
+                            </ErrorBoundary>
 
-                            <MessageList
-                                messages={messages}
-                                isProcessing={isProcessing}
-                                conversationStatus={status}
-                            />
+                            <ErrorBoundary>
+                                <MessageList
+                                    messages={messages}
+                                    isProcessing={isProcessing}
+                                    conversationStatus={status}
+                                />
+                            </ErrorBoundary>
 
                             <ChatInput
                                 onSend={handleSendMessage}
@@ -201,6 +335,14 @@ export default function ChatIndex() {
                     )}
                 </div>
             </div>
+
+            {/* Summary Modal */}
+            <SummaryModal
+                open={summaryModalOpen}
+                onOpenChange={setSummaryModalOpen}
+                summary={currentSummary}
+                conversationTitle={conversation?.title || 'Untitled'}
+            />
         </>
     );
 }

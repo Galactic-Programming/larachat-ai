@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { cn } from '@/lib/utils';
 import { formatMessageTime, isUserMessage, sanitizeMessageContent } from '@/lib/chat-utils';
 import type { Message } from '@/types/chat';
@@ -9,7 +10,7 @@ interface ChatMessageProps {
     isLatest?: boolean;
 }
 
-export function ChatMessage({ message, isLatest = false }: ChatMessageProps) {
+function ChatMessageComponent({ message, isLatest = false }: ChatMessageProps) {
     const isUser = isUserMessage(message.role);
     const isSystem = message.role === 'system';
     const sanitizedContent = sanitizeMessageContent(message.content);
@@ -85,3 +86,14 @@ export function ChatMessage({ message, isLatest = false }: ChatMessageProps) {
         </div>
     );
 }
+
+// Memoize to prevent re-renders unless message changes
+export const ChatMessage = memo(ChatMessageComponent, (prevProps, nextProps) => {
+    return (
+        prevProps.message.id === nextProps.message.id &&
+        prevProps.message.content === nextProps.message.content &&
+        prevProps.isLatest === nextProps.isLatest
+    );
+});
+
+ChatMessage.displayName = 'ChatMessage';

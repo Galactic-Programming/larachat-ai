@@ -65,6 +65,21 @@ export interface PollConversationResponse {
     messages: Message[];
 }
 
+export interface GenerateSummaryResponse {
+    success: boolean;
+    summary: string;
+}
+
+export interface ExtractTopicsResponse {
+    success: boolean;
+    topics: string[];
+}
+
+export interface CategorizeResponse {
+    success: boolean;
+    category: string;
+}
+
 export interface ChatError {
     type: 'rate_limit' | 'unauthorized' | 'not_found' | 'network' | 'server' | 'validation';
     message: string;
