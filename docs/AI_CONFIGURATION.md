@@ -1,10 +1,13 @@
 # AI Configuration Guide
+<!-- markdownlint-disable MD013 -->
 
 This document explains how to configure the AI chatbot behavior in Larachat AI.
 
 ## Overview
 
-The chatbot uses **Groq API (FREE)** with OpenAI SDK compatibility. Groq provides fast, free access to powerful models like Llama 3.3 70B Versatile. Users can customize settings via the AI Settings page or system defaults in .env.
+The chatbot uses **Groq API (FREE)** with OpenAI SDK compatibility. Groq provides
+fast, free access to powerful models like Llama 3.3 70B Versatile. Users can
+customize settings via the AI Settings page or system defaults in .env.
 
 **Important:** As of November 2025, only 2 Groq models are currently working:
 
@@ -28,12 +31,13 @@ Controls randomness and creativity of responses:
 
 | Temperature | Behavior | Best For |
 |-------------|----------|----------|
-| **0.0 - 0.3** | Focused, deterministic, precise | Factual answers, code generation, technical docs |
-| **0.4 - 0.6** | Balanced creativity and accuracy | General conversation, explanations |
-| **0.7 - 1.0** | Creative, varied, exploratory | Brainstorming, creative writing, open-ended tasks |
+| **0.0 - 0.3** | Focused, deterministic, precise | Factual answers |
+| **0.4 - 0.6** | Balanced creativity and accuracy | General conv. |
+| **0.7 - 1.0** | Creative, varied, exploratory | Brainstorming |
 
 **Default:** 0.7 (balanced)  
-**Location:** AI Settings page or config ai.temperature.default
+**Location:** AI Settings page or config
+ai.temperature.default
 
 **Examples:**
 
@@ -49,11 +53,11 @@ Limits the length of AI responses:
 - **1500-8000 tokens** - Long, detailed responses
 - **8000-32768 tokens** - Very long documents (Llama 3.3 70B supports up to 32K)
 
-**Note:** 1 token  4 characters or  0.75 words
+**Note:** 1 token ≈ 4 characters or ≈ 0.75 words
 
 **Location:** Configured per request in OpenAIService
 
-Settings are stored in user session and persist across conversations.- **8000-32768 tokens** - Very long documents (Llama 3.3 70B supports up to 32K)
+## Configuration Methods
 
 ### Method 1: User Settings (Recommended)
 
@@ -79,10 +83,9 @@ AI_USE_MOCK=false
 
 # OpenAI SDK Compatibility - Points to Groq
 OPENAI_BASE_URL=https://api.groq.com/openai/v1
+```
 
 Get your FREE Groq API key at: <https://console.groq.com/keys>
-
-**Laravel Expert:**
 
 ### Method 3: Programmatic (Advanced)
 
@@ -95,44 +98,24 @@ $aiService = app(AiServiceInterface::class);
 $response = $aiService->generateResponse($message, $context);
 ```
 
-``````
+## System Prompt Customization
 
 The system prompt defines the AI's personality and scope. Located in:
 
 **File:** app/Services/OpenAIService.php  
 **Method:** buildMessagesArray()
 
-```**Current Prompt:**
-
-### 3. Creative Writing**Current Prompt:**
-
-`````` note
-
-Model: llama-3.3-70b-versatile
-
-Temperature: 0.9```You are a highly knowledgeable and helpful AI assistant. You can assist with 
-
-```
-
-You are a highly knowledgeable and helpful AI assistant powered by Groq. a wide range of topics including programming, web development, general knowledge,
-
-### 4. Code Generation
-
-You can assist with a wide range of topics including programming, web development, problem-solving, and creative tasks. When discussing code or technical topics,
+**Current Prompt:**
 
 ```text
-You are a highly knowledgeable and helpful AI assistant powered by Groq. 
-You can assist with a wide range of topics including programming, web development, 
-general knowledge, problem-solving, and creative tasks. When discussing code or 
-technical topics, provide clear explanations with practical examples. Be accurate, 
+You are a highly knowledgeable and helpful AI assistant powered by Groq.
+You can assist with a wide range of topics including programming, web development,
+general knowledge, problem-solving, and creative tasks. When discussing code or
+technical topics, provide clear explanations with practical examples. Be accurate,
 concise, and adapt your responses to the user's level of understanding.
 ```
 
-Model: llama-3.1-8b-instant
-
-Temperature: 0.5### Customizing System Prompt
-
-``` prompt
+### Customizing System Prompt
 
 To change AI behavior scope:
 
@@ -142,35 +125,35 @@ private function buildMessagesArray(Conversation $conversation): array
     $messages = [
         ['role' => 'system', 'content' => 'Your custom prompt here...'],
     ];
-    
+
     // ... rest of code
 }
 ```
 
-}```
+**Example Specialized Prompts:**
 
 **Laravel Expert:**
 
 ```text
-You are an expert Laravel developer. Provide practical Laravel advice with 
+You are an expert Laravel developer. Provide practical Laravel advice with
 code examples following Laravel best practices.
 ```
 
-**Solution:** Groq has generous rate limits. If you hit them, wait briefly or consider upgrading to Groq paid tier for higher limits.```
+**Creative Writer:**
 
 ```text
-You are a creative writing assistant. Help users with storytelling, character 
+You are a creative writing assistant. Help users with storytelling, character
 development, and narrative structure.
 ```
 
-### Issue: Want to switch back to OpenAI```
+**Code Reviewer:**
 
 ```text
-You are a senior code reviewer. Analyze code for bugs, performance issues, 
+You are a senior code reviewer. Analyze code for bugs, performance issues,
 security vulnerabilities, and best practices.
 ```
 
-- `llama-3.1-8b-instant````
+## Recommended Settings by Use Case
 
 ### 1. Technical Q&A / Coding Help
 
@@ -186,6 +169,7 @@ Model: llama-3.3-70b-versatile
 Temperature: 0.7
 ```
 
+### 3. Creative Writing
 
 ```yaml
 Model: llama-3.3-70b-versatile
@@ -274,12 +258,11 @@ php artisan test tests/Feature/Settings/AiSettingsTest.php
 
 ### Issue: Only 2 models available
 
-**Explanation:** As of November 2025, Groq has deprecated many models. Only 2 models are currently working:
-
-- llama-3.3-70b-versatile
-- llama-3.1-8b-instant
-
-All deprecated models have been disabled in config/ai.php. This may change in the future - check Groq console for updates.
+**Explanation:** As of November 2025, Groq has deprecated many models.
+Only 2 models are currently working: llama-3.3-70b-versatile and
+llama-3.1-8b-instant. All deprecated models have been disabled in
+config/ai.php. This may change in the future - check Groq console
+for updates.
 
 ## API Reference
 
@@ -296,10 +279,11 @@ session('ai_temperature') // float: 0.0 - 1.0
 config('ai.default_model')        // Default: 'llama-3.3-70b-versatile'
 config('ai.use_mock')             // bool: false (use real API)
 config('ai.temperature.default')  // Default: 0.7
-config('ai.models')               // Array of available models
+config('ai.models')               // Array of available
+models
 ```
 
-### OpenAI Config (Groq Compatibility) *
+### OpenAI Config (Groq Compatibility)
 
 ```php
 config('openai.api_key')     // Groq API key
