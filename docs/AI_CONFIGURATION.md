@@ -53,7 +53,7 @@ Limits the length of AI responses:
 
 **Location:** Configured per request in OpenAIService
 
-## Configuration Methods
+Settings are stored in user session and persist across conversations.- **8000-32768 tokens** - Very long documents (Llama 3.3 70B supports up to 32K)
 
 ### Method 1: User Settings (Recommended)
 
@@ -82,6 +82,8 @@ OPENAI_BASE_URL=https://api.groq.com/openai/v1
 
 Get your FREE Groq API key at: <https://console.groq.com/keys>
 
+**Laravel Expert:**
+
 ### Method 3: Programmatic (Advanced)
 
 Use the AI Service Interface:
@@ -93,14 +95,30 @@ $aiService = app(AiServiceInterface::class);
 $response = $aiService->generateResponse($message, $context);
 ```
 
-## System Prompt Customization
+``````
 
 The system prompt defines the AI's personality and scope. Located in:
 
 **File:** app/Services/OpenAIService.php  
 **Method:** buildMessagesArray()
 
-**Current Prompt:**
+```**Current Prompt:**
+
+### 3. Creative Writing**Current Prompt:**
+
+`````` note
+
+Model: llama-3.3-70b-versatile
+
+Temperature: 0.9```You are a highly knowledgeable and helpful AI assistant. You can assist with 
+
+```
+
+You are a highly knowledgeable and helpful AI assistant powered by Groq. a wide range of topics including programming, web development, general knowledge,
+
+### 4. Code Generation
+
+You can assist with a wide range of topics including programming, web development, problem-solving, and creative tasks. When discussing code or technical topics,
 
 ```text
 You are a highly knowledgeable and helpful AI assistant powered by Groq. 
@@ -110,7 +128,11 @@ technical topics, provide clear explanations with practical examples. Be accurat
 concise, and adapt your responses to the user's level of understanding.
 ```
 
-### Customizing System Prompt
+Model: llama-3.1-8b-instant
+
+Temperature: 0.5### Customizing System Prompt
+
+``` prompt
 
 To change AI behavior scope:
 
@@ -125,7 +147,7 @@ private function buildMessagesArray(Conversation $conversation): array
 }
 ```
 
-**Example Specialized Prompts:**
+}```
 
 **Laravel Expert:**
 
@@ -134,21 +156,21 @@ You are an expert Laravel developer. Provide practical Laravel advice with
 code examples following Laravel best practices.
 ```
 
-**Creative Writer:**
+**Solution:** Groq has generous rate limits. If you hit them, wait briefly or consider upgrading to Groq paid tier for higher limits.```
 
 ```text
 You are a creative writing assistant. Help users with storytelling, character 
 development, and narrative structure.
 ```
 
-**Code Reviewer:**
+### Issue: Want to switch back to OpenAI```
 
 ```text
 You are a senior code reviewer. Analyze code for bugs, performance issues, 
 security vulnerabilities, and best practices.
 ```
 
-## Recommended Settings by Use Case
+- `llama-3.1-8b-instant````
 
 ### 1. Technical Q&A / Coding Help
 
@@ -164,7 +186,6 @@ Model: llama-3.3-70b-versatile
 Temperature: 0.7
 ```
 
-### 3. Creative Writing
 
 ```yaml
 Model: llama-3.3-70b-versatile
@@ -278,7 +299,7 @@ config('ai.temperature.default')  // Default: 0.7
 config('ai.models')               // Array of available models
 ```
 
-### OpenAI Config (Groq Compatibility)
+### OpenAI Config (Groq Compatibility) *
 
 ```php
 config('openai.api_key')     // Groq API key
