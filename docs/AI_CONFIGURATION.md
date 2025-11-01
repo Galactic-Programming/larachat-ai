@@ -98,7 +98,7 @@ $aiService = app(AiServiceInterface::class);
 $response = $aiService->generateResponse($message, $context);
 ```
 
-## System Prompt Customization
+``````
 
 The system prompt defines the AI's personality and scope. Located in:
 
@@ -115,7 +115,9 @@ technical topics, provide clear explanations with practical examples. Be accurat
 concise, and adapt your responses to the user's level of understanding.
 ```
 
-### Customizing System Prompt
+Model: llama-3.1-8b-instant
+
+Temperature: 0.5### Customizing System Prompt
 
 To change AI behavior scope:
 
@@ -130,7 +132,7 @@ private function buildMessagesArray(Conversation $conversation): array
 }
 ```
 
-**Example Specialized Prompts:**
+}```
 
 **Laravel Expert:**
 
@@ -153,7 +155,7 @@ You are a senior code reviewer. Analyze code for bugs, performance issues,
 security vulnerabilities, and best practices.
 ```
 
-## Recommended Settings by Use Case
+- `llama-3.1-8b-instant````
 
 ### 1. Technical Q&A / Coding Help
 
@@ -283,7 +285,7 @@ config('ai.models')               // Array of available
 models
 ```
 
-### OpenAI Config (Groq Compatibility)
+### OpenAI Config (Groq Compatibility) *
 
 ```php
 config('openai.api_key')     // Groq API key
