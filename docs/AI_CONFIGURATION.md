@@ -132,8 +132,6 @@ private function buildMessagesArray(Conversation $conversation): array
 }
 ```
 
-}```
-
 **Laravel Expert:**
 
 ```text
