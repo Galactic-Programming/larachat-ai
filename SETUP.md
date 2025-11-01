@@ -1,13 +1,13 @@
-# 🚀 Laravel AI Chat - Setup Guide
+# 🚀 Larachat AI - Setup Guide
 
 ## Prerequisites
 
-- PHP 8.2+
+- PHP 8.4+
 - Composer
 - Node.js 18+
 - npm or yarn
 - SQLite (default) or MySQL/PostgreSQL
-- OpenAI API Key
+- **Groq API Key (FREE!)** - Get from [https://console.groq.com](https://console.groq.com)
 
 ## 📦 Installation Steps
 
@@ -41,7 +41,7 @@ Edit `.env` file:
 
 ```env
 # Application
-APP_NAME="Laravel AI Chat"
+APP_NAME="Larachat AI"
 APP_ENV=local
 APP_DEBUG=true
 APP_URL=http://127.0.0.1:8000
@@ -50,16 +50,21 @@ APP_URL=http://127.0.0.1:8000
 DB_CONNECTION=sqlite
 # DB_DATABASE will use database/database.sqlite automatically
 
-# OpenAI API
-OPENAI_API_KEY=your-openai-api-key-here
-OPENAI_MODEL=gpt-4o-mini  # or gpt-4o, gpt-4-turbo
+# Groq API (FREE!)
+GROQ_API_KEY=your-groq-api-key-here
+AI_DEFAULT_MODEL=llama-3.3-70b-versatile  # Recommended: fast & capable
+AI_USE_MOCK=false  # Set to true for offline development
+
+# OpenAI SDK Configuration (for Groq compatibility)
+OPENAI_API_KEY=${GROQ_API_KEY}  # Use same key as Groq
+OPENAI_BASE_URL=https://api.groq.com/openai/v1
 
 # Queue (Use 'sync' for development, 'database' for production)
 QUEUE_CONNECTION=sync
 
 # Session & Cache
-SESSION_DRIVER=file
-CACHE_STORE=file
+SESSION_DRIVER=database
+CACHE_STORE=database
 ```
 
 ### 4. Database Setup
@@ -110,6 +115,30 @@ php artisan serve
 
 ## ⚙️ Configuration Options
 
+### AI Models (Groq - All FREE!)
+
+Available models:
+
+- `llama-3.3-70b-versatile` - **Recommended**: Best overall, fast, versatile
+- `llama-3.1-70b-versatile` - Great for coding and analysis
+- `llama3-groq-70b-8192-tool-use-preview` - Optimized for function calling
+- `mixtral-8x7b-32768` - Ultra-fast with large context window
+- `gemma2-9b-it` - Lightweight and fast
+
+Change model in `.env`:
+
+```env
+AI_DEFAULT_MODEL=llama-3.3-70b-versatile
+```
+
+### Mock Mode (Offline Development)
+
+For development without API calls:
+
+```env
+AI_USE_MOCK=true
+```
+
 ### Queue Driver
 
 **Development (Recommended):**
@@ -121,21 +150,16 @@ QUEUE_CONNECTION=sync
 Jobs run immediately, no need for queue worker.
 
 **Production:**
+
 ```env
 QUEUE_CONNECTION=database
+```
 
-``` note
-Jobs run in background. **Must run queue worker:**
+**Note:** Jobs run in background. **Must run queue worker:**
 
 ```bash
 php artisan queue:work --tries=3 --timeout=90
 ```
-
-### OpenAI Model Options
-
-- `gpt-4o-mini` - Fast & cheap (recommended for dev)
-- `gpt-4o` - More capable, slower
-- `gpt-4-turbo` - Balanced performance
 
 ### Database Options
 
@@ -214,13 +238,14 @@ php artisan cache:clear
 - Development: Use `QUEUE_CONNECTION=sync`
 - Production: Run `php artisan queue:work`
 
-### Issue: "OpenAI API errors"
+### Issue: "Groq API errors"
 
 **Solution:**
 
-- Check API key is valid
-- Ensure you have credits in OpenAI account
-- Verify model name is correct
+- Check API key is valid at [https://console.groq.com](https://console.groq.com)
+- Verify model name matches available Groq models
+- Check rate limits (generous for FREE tier)
+- For offline development, set `AI_USE_MOCK=true`
 
 ### Issue: Frontend not updating
 
@@ -264,7 +289,7 @@ php artisan queue:work --daemon --tries=3 --timeout=90
 
 - [Laravel Documentation](https://laravel.com/docs)
 - [Inertia.js Documentation](https://inertiajs.com)
-- [OpenAI API Documentation](https://platform.openai.com/docs)
+- [Groq API Documentation](https://console.groq.com/docs)
 - [Tailwind CSS Documentation](https://tailwindcss.com/docs)
 
 ## 🆘 Support
@@ -272,9 +297,8 @@ php artisan queue:work --daemon --tries=3 --timeout=90
 For issues or questions:
 
 - Check logs: `storage/logs/laravel.log`
-- AI-specific logs: `storage/logs/ai.log`
 - Run tests: `php artisan test`
 
 ---
 
-**Note:** Remember to add your OpenAI API key before using the chat features!
+**Note:** Remember to add your Groq API key (FREE!) before using the chat features! Get yours at [https://console.groq.com](https://console.groq.com)
