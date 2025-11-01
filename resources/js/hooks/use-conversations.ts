@@ -23,8 +23,6 @@ export function useConversations(): UseConversationsReturn {
         setError(null);
 
         try {
-            // TODO: Update this when we create the actual endpoint
-            // For now, we'll handle if the endpoint doesn't exist yet
             const response = await axios.get<ConversationListResponse>(
                 '/api/conversations',
             );
@@ -83,7 +81,6 @@ export function useConversations(): UseConversationsReturn {
         setError(null);
 
         try {
-            // TODO: Implement delete endpoint in backend
             await axios.delete(`/api/conversations/${id}`);
 
             setConversations((prev) => prev.filter((conv) => conv.id !== id));

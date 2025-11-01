@@ -115,33 +115,62 @@ export default function ChatIndex() {
         refreshConversations();
     };
 
-    // AI-enhanced features
+    // AI-enhanced features with retry logic for async operations
     const handleGenerateSummary = async () => {
         if (!selectedConversationId) return;
 
         setAiFeatureLoading('summary');
-        try {
-            const response = await axios.post<GenerateSummaryResponse>(
-                `/api/conversations/${selectedConversationId}/summary`,
-            );
 
-            if (response.data.success) {
-                // Store for export
-                setExportMetadata((prev) => ({ ...prev, summary: response.data.summary }));
-                // Store for modal display
-                setCurrentSummary(response.data.summary);
-                // Show success toast with action
-                toast.success('Summary generated successfully', {
-                    action: {
-                        label: 'View',
-                        onClick: () => setSummaryModalOpen(true),
-                    },
-                    duration: 5000,
-                });
+        const maxRetries = 3;
+        const retryDelay = 5000; // 5 seconds
+
+        const attemptGenerate = async (attempt: number): Promise<void> => {
+            try {
+                const response = await axios.post<GenerateSummaryResponse>(
+                    `/api/conversations/${selectedConversationId}/summary`,
+                );
+
+                // Handle 202 Accepted (processing)
+                if (response.status === 202 || response.data.status === 'processing') {
+                    if (attempt < maxRetries) {
+                        toast.info(`Generating summary... (attempt ${attempt}/${maxRetries})`, {
+                            duration: 3000,
+                        });
+
+                        // Retry after delay
+                        await new Promise(resolve => setTimeout(resolve, retryDelay));
+                        return attemptGenerate(attempt + 1);
+                    } else {
+                        toast.warning('Summary generation is taking longer than expected. It will be available soon.', {
+                            duration: 5000,
+                        });
+                        return;
+                    }
+                }
+
+                // Handle 200 OK (success with data)
+                if (response.data.success && response.data.summary) {
+                    setExportMetadata((prev) => ({ ...prev, summary: response.data.summary }));
+                    setCurrentSummary(response.data.summary!);
+
+                    const cachedLabel = response.data.cached ? ' (from cache)' : '';
+                    toast.success(`Summary generated successfully${cachedLabel}`, {
+                        action: {
+                            label: 'View',
+                            onClick: () => setSummaryModalOpen(true),
+                        },
+                        duration: 5000,
+                    });
+                }
+            } catch (error) {
+                console.error('Failed to generate summary:', error);
+                toast.error('Failed to generate summary. Please try again.');
+                throw error;
             }
-        } catch (error) {
-            console.error('Failed to generate summary:', error);
-            toast.error('Failed to generate summary. Please try again.');
+        };
+
+        try {
+            await attemptGenerate(1);
         } finally {
             setAiFeatureLoading(null);
         }
@@ -151,22 +180,51 @@ export default function ChatIndex() {
         if (!selectedConversationId) return;
 
         setAiFeatureLoading('topics');
-        try {
-            const response = await axios.post<ExtractTopicsResponse>(
-                `/api/conversations/${selectedConversationId}/topics`,
-            );
 
-            if (response.data.success) {
-                // Store for export
-                setExportMetadata((prev) => ({ ...prev, topics: response.data.topics }));
-                // Show topics in toast
-                toast.success(`Topics extracted: ${response.data.topics.join(', ')}`, {
-                    duration: 5000,
-                });
+        const maxRetries = 3;
+        const retryDelay = 5000;
+
+        const attemptExtract = async (attempt: number): Promise<void> => {
+            try {
+                const response = await axios.post<ExtractTopicsResponse>(
+                    `/api/conversations/${selectedConversationId}/topics`,
+                );
+
+                // Handle 202 Accepted (processing)
+                if (response.status === 202 || response.data.status === 'processing') {
+                    if (attempt < maxRetries) {
+                        toast.info(`Extracting topics... (attempt ${attempt}/${maxRetries})`, {
+                            duration: 3000,
+                        });
+
+                        await new Promise(resolve => setTimeout(resolve, retryDelay));
+                        return attemptExtract(attempt + 1);
+                    } else {
+                        toast.warning('Topic extraction is taking longer than expected. It will be available soon.', {
+                            duration: 5000,
+                        });
+                        return;
+                    }
+                }
+
+                // Handle 200 OK (success with data)
+                if (response.data.success && response.data.topics) {
+                    setExportMetadata((prev) => ({ ...prev, topics: response.data.topics }));
+
+                    const cachedLabel = response.data.cached ? ' (from cache)' : '';
+                    toast.success(`Topics extracted${cachedLabel}: ${response.data.topics!.join(', ')}`, {
+                        duration: 5000,
+                    });
+                }
+            } catch (error) {
+                console.error('Failed to extract topics:', error);
+                toast.error('Failed to extract topics. Please try again.');
+                throw error;
             }
-        } catch (error) {
-            console.error('Failed to extract topics:', error);
-            toast.error('Failed to extract topics. Please try again.');
+        };
+
+        try {
+            await attemptExtract(1);
         } finally {
             setAiFeatureLoading(null);
         }
@@ -176,22 +234,51 @@ export default function ChatIndex() {
         if (!selectedConversationId) return;
 
         setAiFeatureLoading('category');
-        try {
-            const response = await axios.post<CategorizeResponse>(
-                `/api/conversations/${selectedConversationId}/categorize`,
-            );
 
-            if (response.data.success) {
-                // Store for export
-                setExportMetadata((prev) => ({ ...prev, category: response.data.category }));
-                // Show category in toast
-                toast.success(`Categorized as: ${response.data.category}`, {
-                    duration: 4000,
-                });
+        const maxRetries = 3;
+        const retryDelay = 5000;
+
+        const attemptCategorize = async (attempt: number): Promise<void> => {
+            try {
+                const response = await axios.post<CategorizeResponse>(
+                    `/api/conversations/${selectedConversationId}/categorize`,
+                );
+
+                // Handle 202 Accepted (processing)
+                if (response.status === 202 || response.data.status === 'processing') {
+                    if (attempt < maxRetries) {
+                        toast.info(`Categorizing conversation... (attempt ${attempt}/${maxRetries})`, {
+                            duration: 3000,
+                        });
+
+                        await new Promise(resolve => setTimeout(resolve, retryDelay));
+                        return attemptCategorize(attempt + 1);
+                    } else {
+                        toast.warning('Categorization is taking longer than expected. It will be available soon.', {
+                            duration: 5000,
+                        });
+                        return;
+                    }
+                }
+
+                // Handle 200 OK (success with data)
+                if (response.data.success && response.data.category) {
+                    setExportMetadata((prev) => ({ ...prev, category: response.data.category }));
+
+                    const cachedLabel = response.data.cached ? ' (from cache)' : '';
+                    toast.success(`Categorized as${cachedLabel}: ${response.data.category!}`, {
+                        duration: 4000,
+                    });
+                }
+            } catch (error) {
+                console.error('Failed to categorize:', error);
+                toast.error('Failed to categorize. Please try again.');
+                throw error;
             }
-        } catch (error) {
-            console.error('Failed to categorize:', error);
-            toast.error('Failed to categorize. Please try again.');
+        };
+
+        try {
+            await attemptCategorize(1);
         } finally {
             setAiFeatureLoading(null);
         }

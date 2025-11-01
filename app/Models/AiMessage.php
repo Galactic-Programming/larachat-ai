@@ -1,5 +1,7 @@
 <?php
+
 // app/Models/AiMessage.php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -9,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class AiMessage extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'conversation_id',
         'role',

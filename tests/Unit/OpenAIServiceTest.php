@@ -1,5 +1,7 @@
 <?php
+
 // tests/Unit/OpenAIServiceTest.php
+
 namespace Tests\Unit;
 
 use App\Models\Conversation;
@@ -49,7 +51,7 @@ class OpenAIServiceTest extends TestCase
             ]),
         ]);
 
-        $service = new OpenAIService();
+        $service = new OpenAIService;
 
         // Act
         $result = $service->generateResponse($conversation, 'What are Laravel service containers?');
@@ -89,7 +91,7 @@ class OpenAIServiceTest extends TestCase
             new \Exception('OpenAI API connection failed'),
         ]);
 
-        $service = new OpenAIService();
+        $service = new OpenAIService;
 
         // Act & Assert
         $this->expectException(\Exception::class);
@@ -125,7 +127,7 @@ class OpenAIServiceTest extends TestCase
             ]),
         ]);
 
-        $service = new OpenAIService();
+        $service = new OpenAIService;
 
         // Act - First call
         $result1 = $service->generateResponse($conversation, 'Same question');

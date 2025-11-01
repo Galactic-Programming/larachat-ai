@@ -21,9 +21,9 @@ class AiMessageFactory extends Factory
 
         return [
             'conversation_id' => Conversation::factory(),
-            'role'            => $this->faker->randomElement(['user', 'assistant']),
-            'content'         => $content,
-            'token_count'     => (int) ceil(strlen($content) / 4), // Rough estimation
+            'role' => $this->faker->randomElement(['user', 'assistant']),
+            'content' => $content,
+            'token_count' => (int) ceil(strlen($content) / 4), // Rough estimation
         ];
     }
 
@@ -32,7 +32,7 @@ class AiMessageFactory extends Factory
      */
     public function user(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'role' => 'user',
         ]);
     }
@@ -42,7 +42,7 @@ class AiMessageFactory extends Factory
      */
     public function assistant(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'role' => 'assistant',
         ]);
     }
@@ -52,7 +52,7 @@ class AiMessageFactory extends Factory
      */
     public function system(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'role' => 'system',
         ]);
     }

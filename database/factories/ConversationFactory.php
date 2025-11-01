@@ -1,5 +1,7 @@
 <?php
+
 // database/factories/ConversationFactory.php
+
 namespace Database\Factories;
 
 use App\Models\User;
@@ -11,8 +13,8 @@ class ConversationFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'title'   => $this->faker->sentence(),
-            'status'  => 'active',
+            'title' => $this->faker->sentence(),
+            'status' => 'active',
         ];
     }
 }

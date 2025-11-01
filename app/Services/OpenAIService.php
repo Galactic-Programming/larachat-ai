@@ -1,17 +1,21 @@
 <?php
+
 // app/Services/OpenAIService.php
+
 namespace App\Services;
 
-use App\Models\Conversation;
 use App\Models\AiMessage;
-use OpenAI\Laravel\Facades\OpenAI;
+use App\Models\Conversation;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use OpenAI\Laravel\Facades\OpenAI;
 
 class OpenAIService implements AiServiceInterface
 {
     private string $model = 'llama-3.3-70b-versatile'; // Groq default model
+
     private float $temperature = 0.3;
+
     private int $maxTokens = 1500;
 
     public function __construct(
@@ -31,9 +35,8 @@ class OpenAIService implements AiServiceInterface
     /**
      * Generate AI response for a conversation
      *
-     * @param Conversation $conversation
-     * @param string $userMessage
      * @return array{response: string, usage: array}
+     *
      * @throws \Exception
      */
     public function generateResponse(Conversation $conversation, string $userMessage): array
@@ -49,6 +52,7 @@ class OpenAIService implements AiServiceInterface
                 'conversation_id' => $conversation->id,
                 'duration_ms' => round((microtime(true) - $startTime) * 1000, 2),
             ]);
+
             return [
                 'response' => $cached['response'],
                 'usage' => ['cached' => true, 'prompt_tokens' => 0, 'completion_tokens' => 0, 'total_tokens' => 0],
@@ -139,7 +143,7 @@ class OpenAIService implements AiServiceInterface
             ->limit(10)
             ->get()
             ->reverse()
-            ->map(fn($msg) => [
+            ->map(fn ($msg) => [
                 'role' => $msg->role,
                 'content' => $msg->content,
             ])
@@ -153,7 +157,7 @@ class OpenAIService implements AiServiceInterface
      */
     private function getCacheKey(int $conversationId, string $userMessage): string
     {
-        return 'ai_response:' . md5($conversationId . ':' . $userMessage);
+        return 'ai_response:'.md5($conversationId.':'.$userMessage);
     }
 
     /**
@@ -174,18 +178,18 @@ class OpenAIService implements AiServiceInterface
     {
         try {
             $result = OpenAI::chat()->create([
-                'model'    => $this->model,
+                'model' => $this->model,
                 'messages' => [
                     [
-                        'role'    => 'system',
+                        'role' => 'system',
                         'content' => 'Generate a short, concise title (max 6 words) for this conversation. Return only the title, no quotes or extra text.',
                     ],
                     [
-                        'role'    => 'user',
+                        'role' => 'user',
                         'content' => "Conversation excerpt: {$context}",
                     ],
                 ],
-                'max_tokens'  => 20,
+                'max_tokens' => 20,
                 'temperature' => 0.7,
             ]);
 
@@ -194,6 +198,7 @@ class OpenAIService implements AiServiceInterface
             Log::channel('ai')->error('Failed to generate title', [
                 'error' => $e->getMessage(),
             ]);
+
             return 'New Conversation';
         }
     }
@@ -205,18 +210,18 @@ class OpenAIService implements AiServiceInterface
     {
         try {
             $result = OpenAI::chat()->create([
-                'model'    => $this->model,
+                'model' => $this->model,
                 'messages' => [
                     [
-                        'role'    => 'system',
+                        'role' => 'system',
                         'content' => 'Summarize this conversation in 2-3 concise sentences. Focus on the main topics discussed and key points.',
                     ],
                     [
-                        'role'    => 'user',
+                        'role' => 'user',
                         'content' => "Conversation:\n{$conversationText}",
                     ],
                 ],
-                'max_tokens'  => 150,
+                'max_tokens' => 150,
                 'temperature' => 0.5,
             ]);
 
@@ -225,6 +230,7 @@ class OpenAIService implements AiServiceInterface
             Log::channel('ai')->error('Failed to generate summary', [
                 'error' => $e->getMessage(),
             ]);
+
             return 'Unable to generate summary at this time.';
         }
     }
@@ -236,18 +242,18 @@ class OpenAIService implements AiServiceInterface
     {
         try {
             $result = OpenAI::chat()->create([
-                'model'    => $this->model,
+                'model' => $this->model,
                 'messages' => [
                     [
-                        'role'    => 'system',
+                        'role' => 'system',
                         'content' => 'Categorize this conversation into ONE of these categories: Tech, Programming, Personal, Work, Education, Creative, Other. Return only the category name.',
                     ],
                     [
-                        'role'    => 'user',
+                        'role' => 'user',
                         'content' => "Conversation: {$context}",
                     ],
                 ],
-                'max_tokens'  => 10,
+                'max_tokens' => 10,
                 'temperature' => 0.3,
             ]);
 
@@ -256,6 +262,7 @@ class OpenAIService implements AiServiceInterface
             Log::channel('ai')->error('Failed to categorize conversation', [
                 'error' => $e->getMessage(),
             ]);
+
             return 'General';
         }
     }
@@ -267,27 +274,29 @@ class OpenAIService implements AiServiceInterface
     {
         try {
             $result = OpenAI::chat()->create([
-                'model'    => $this->model,
+                'model' => $this->model,
                 'messages' => [
                     [
-                        'role'    => 'system',
+                        'role' => 'system',
                         'content' => 'Extract 3-5 key topics from this conversation. Return as comma-separated list. Be concise.',
                     ],
                     [
-                        'role'    => 'user',
+                        'role' => 'user',
                         'content' => "Conversation: {$conversationText}",
                     ],
                 ],
-                'max_tokens'  => 50,
+                'max_tokens' => 50,
                 'temperature' => 0.5,
             ]);
 
             $topicsString = $result->choices[0]->message->content;
+
             return array_map('trim', explode(',', $topicsString));
         } catch (\Exception $e) {
             Log::channel('ai')->error('Failed to extract topics', [
                 'error' => $e->getMessage(),
             ]);
+
             return [];
         }
     }

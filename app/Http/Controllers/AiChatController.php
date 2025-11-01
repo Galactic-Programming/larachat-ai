@@ -1,5 +1,7 @@
 <?php
+
 // app/Http/Controllers/AiChatController.php
+
 namespace App\Http\Controllers;
 
 use App\Jobs\CategorizeConversation;
@@ -7,15 +9,14 @@ use App\Jobs\ExtractConversationTopics;
 use App\Jobs\GenerateConversationSummary;
 use App\Jobs\ProcessAiConversation;
 use App\Models\Conversation;
+use App\Services\InputSanitizer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use App\Services\InputSanitizer;
 
 class AiChatController extends Controller
 {
-
     /**
      * Create new conversation
      */
@@ -31,12 +32,12 @@ class AiChatController extends Controller
 
         $conversation = Conversation::create([
             'user_id' => Auth::id(),
-            'title'   => $request->input('title'),
-            'status'  => 'active',
+            'title' => $request->input('title'),
+            'status' => 'active',
         ]);
 
         return response()->json([
-            'success'      => true,
+            'success' => true,
             'conversation' => $conversation,
         ], 201);
     }
@@ -66,9 +67,9 @@ class AiChatController extends Controller
         // This ensures message is visible to user right away
         $userMessage = \App\Models\AiMessage::create([
             'conversation_id' => $conversation->id,
-            'role'            => 'user',
-            'content'         => $sanitizedMessage, // Use sanitized input
-            'token_count'     => \App\Models\AiMessage::estimateTokens($sanitizedMessage),
+            'role' => 'user',
+            'content' => $sanitizedMessage, // Use sanitized input
+            'token_count' => \App\Models\AiMessage::estimateTokens($sanitizedMessage),
         ]);
 
         // Update conversation status to processing
@@ -78,18 +79,18 @@ class AiChatController extends Controller
         $conversation->load([
             'messages' => function ($query) {
                 $query->orderBy('created_at', 'asc');
-            }
+            },
         ]);
 
         // Dispatch job to queue for AI response generation
         ProcessAiConversation::dispatch($conversation->id, $sanitizedMessage); // Use sanitized input
 
         return response()->json([
-            'success'         => true,
-            'status'          => 'processing',
-            'message'         => 'Your message is being processed. Check back shortly.',
+            'success' => true,
+            'status' => 'processing',
+            'message' => 'Your message is being processed. Check back shortly.',
             'user_message_id' => $userMessage->id,
-            'conversation'    => $conversation, // Return full conversation with messages
+            'conversation' => $conversation, // Return full conversation with messages
         ], 202); // 202 Accepted
     }
 
@@ -101,15 +102,15 @@ class AiChatController extends Controller
         $conversation = Conversation::with([
             'messages' => function ($query) {
                 $query->orderBy('created_at', 'desc')->limit(20);
-            }
+            },
         ])
             ->where('id', $conversationId)
             ->where('user_id', Auth::id())
             ->firstOrFail();
 
         return response()->json([
-            'success'  => true,
-            'status'   => $conversation->status,
+            'success' => true,
+            'status' => $conversation->status,
             'messages' => $conversation->messages->reverse()->values(),
         ]);
     }
@@ -125,7 +126,7 @@ class AiChatController extends Controller
             ->firstOrFail();
 
         return response()->json([
-            'success'      => true,
+            'success' => true,
             'conversation' => $conversation,
         ]);
     }
@@ -141,7 +142,7 @@ class AiChatController extends Controller
             ->get();
 
         return response()->json([
-            'success'       => true,
+            'success' => true,
             'conversations' => $conversations,
         ]);
     }
@@ -179,7 +180,7 @@ class AiChatController extends Controller
             return response()->json([
                 'success' => true,
                 'summary' => $cachedSummary,
-                'cached'  => true,
+                'cached' => true,
             ]);
         }
 
@@ -189,7 +190,7 @@ class AiChatController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Summary generation in progress. Please check back shortly.',
-            'status'  => 'processing',
+            'status' => 'processing',
         ], 202);
     }
 
@@ -208,8 +209,8 @@ class AiChatController extends Controller
         if ($cachedTopics) {
             return response()->json([
                 'success' => true,
-                'topics'  => $cachedTopics,
-                'cached'  => true,
+                'topics' => $cachedTopics,
+                'cached' => true,
             ]);
         }
 
@@ -219,7 +220,7 @@ class AiChatController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Topic extraction in progress. Please check back shortly.',
-            'status'  => 'processing',
+            'status' => 'processing',
         ], 202);
     }
 
@@ -237,9 +238,9 @@ class AiChatController extends Controller
 
         if ($cachedCategory) {
             return response()->json([
-                'success'  => true,
+                'success' => true,
                 'category' => $cachedCategory,
-                'cached'   => true,
+                'cached' => true,
             ]);
         }
 
@@ -249,7 +250,7 @@ class AiChatController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Categorization in progress. Please check back shortly.',
-            'status'  => 'processing',
+            'status' => 'processing',
         ], 202);
     }
 }

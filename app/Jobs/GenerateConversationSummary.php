@@ -15,6 +15,7 @@ class GenerateConversationSummary implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $tries = 2;
+
     public int $backoff = 3;
 
     /**
@@ -22,8 +23,7 @@ class GenerateConversationSummary implements ShouldQueue
      */
     public function __construct(
         public int $conversationId
-    ) {
-    }
+    ) {}
 
     /**
      * Execute the job.
@@ -47,7 +47,7 @@ class GenerateConversationSummary implements ShouldQueue
         } catch (\Exception $e) {
             Log::channel('ai')->error('Failed to generate conversation summary', [
                 'conversation_id' => $this->conversationId,
-                'error'           => $e->getMessage(),
+                'error' => $e->getMessage(),
             ]);
 
             throw $e;

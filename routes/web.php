@@ -28,4 +28,4 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('chat.index');
 });
 
-require __DIR__ . '/settings.php';
+require __DIR__.'/settings.php';

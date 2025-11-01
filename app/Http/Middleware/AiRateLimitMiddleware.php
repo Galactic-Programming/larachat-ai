@@ -1,5 +1,7 @@
 <?php
+
 // app/Http/Middleware/AiRateLimitMiddleware.php
+
 namespace App\Http\Middleware;
 
 use Closure;
@@ -14,7 +16,7 @@ class AiRateLimitMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $key = 'ai-requests:' . $request->user()?->id ?? $request->ip();
+        $key = 'ai-requests:'.$request->user()?->id ?? $request->ip();
 
         // Limit: 20 AI requests per minute per user
         $executed = RateLimiter::attempt(
@@ -24,9 +26,9 @@ class AiRateLimitMiddleware
             $decaySeconds = 60
         );
 
-        if (!$executed) {
+        if (! $executed) {
             return response()->json([
-                'error'       => 'Too many AI requests. Please slow down.',
+                'error' => 'Too many AI requests. Please slow down.',
                 'retry_after' => RateLimiter::availableIn($key),
             ], 429);
         }

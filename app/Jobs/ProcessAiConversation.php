@@ -1,17 +1,18 @@
 <?php
+
 // app/Jobs/ProcessAiConversation.php
+
 namespace App\Jobs;
 
 use App\Models\Conversation;
-use App\Services\OpenAIService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
-use OpenAI\Exceptions\RateLimitException;
 use OpenAI\Exceptions\ErrorException;
+use OpenAI\Exceptions\RateLimitException;
 
 class ProcessAiConversation implements ShouldQueue
 {
@@ -33,8 +34,7 @@ class ProcessAiConversation implements ShouldQueue
     public function __construct(
         public int $conversationId,
         public string $userMessage
-    ) {
-    }
+    ) {}
 
     /**
      * Execute the job.
@@ -53,7 +53,7 @@ class ProcessAiConversation implements ShouldQueue
                 ? app(\App\Services\MockOpenAIService::class)
                 : app(\App\Services\OpenAIService::class);
 
-            Log::info('Processing with ' . ($useMock ? 'MOCK' : 'REAL') . ' AI service', [
+            Log::info('Processing with '.($useMock ? 'MOCK' : 'REAL').' AI service', [
                 'conversation_id' => $this->conversationId,
             ]);
 
@@ -72,8 +72,8 @@ class ProcessAiConversation implements ShouldQueue
 
             Log::info('AI conversation processed successfully', [
                 'conversation_id' => $this->conversationId,
-                'tokens_used'     => $result['usage']['total_tokens'],
-                'message_count'   => $messageCount,
+                'tokens_used' => $result['usage']['total_tokens'],
+                'message_count' => $messageCount,
             ]);
 
         } catch (RateLimitException $e) {
@@ -81,15 +81,15 @@ class ProcessAiConversation implements ShouldQueue
             Log::warning('OpenAI Rate Limit Exceeded', [
                 'conversation_id' => $this->conversationId,
                 'error' => $e->getMessage(),
-                'note'  => 'Free tier: 3 requests/minute limit. Please wait 60 seconds.'
+                'note' => 'Free tier: 3 requests/minute limit. Please wait 60 seconds.',
             ]);
 
             // Create helpful mock response
             \App\Models\AiMessage::create([
                 'conversation_id' => $this->conversationId,
-                'role'            => 'assistant',
-                'content'         => "⚠️ **Rate Limit Notice**\n\nThe OpenAI API has reached its rate limit (3 requests per minute for free tier).\n\n**What to do:**\n1. Wait 60 seconds before sending another message\n2. Check your OpenAI billing: https://platform.openai.com/account/billing\n3. Add a payment method to increase limits\n\nYour message was received and will be processed once the limit resets. 🤖",
-                'token_count'     => 80,
+                'role' => 'assistant',
+                'content' => "⚠️ **Rate Limit Notice**\n\nThe OpenAI API has reached its rate limit (3 requests per minute for free tier).\n\n**What to do:**\n1. Wait 60 seconds before sending another message\n2. Check your OpenAI billing: https://platform.openai.com/account/billing\n3. Add a payment method to increase limits\n\nYour message was received and will be processed once the limit resets. 🤖",
+                'token_count' => 80,
             ]);
 
             Conversation::find($this->conversationId)?->update(['status' => 'completed']);
@@ -101,19 +101,20 @@ class ProcessAiConversation implements ShouldQueue
             // Handle other OpenAI API errors
             Log::error('OpenAI API Error', [
                 'conversation_id' => $this->conversationId,
-                'error'           => $e->getMessage(),
-                'type'            => get_class($e),
+                'error' => $e->getMessage(),
+                'type' => get_class($e),
             ]);
 
             // Create error message for user
             \App\Models\AiMessage::create([
                 'conversation_id' => $this->conversationId,
-                'role'            => 'assistant',
-                'content'         => "❌ **AI Service Error**\n\nThe AI service encountered an error: " . $e->getMessage() . "\n\nPlease try again or contact support if the issue persists.",
-                'token_count'     => 50,
+                'role' => 'assistant',
+                'content' => "❌ **AI Service Error**\n\nThe AI service encountered an error: ".$e->getMessage()."\n\nPlease try again or contact support if the issue persists.",
+                'token_count' => 50,
             ]);
 
             Conversation::find($this->conversationId)?->update(['status' => 'error']);
+
             return;
 
         } catch (\Exception $e) {
@@ -121,10 +122,10 @@ class ProcessAiConversation implements ShouldQueue
             Log::error('AI conversation processing failed', [
                 'conversation_id' => $this->conversationId,
                 'error' => $e->getMessage(),
-                'type'  => get_class($e),
-                'code'  => $e->getCode(),
-                'file'  => $e->getFile(),
-                'line'  => $e->getLine(),
+                'type' => get_class($e),
+                'code' => $e->getCode(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
             ]);
 
             // Update conversation status to error (valid status from migration)
@@ -142,7 +143,7 @@ class ProcessAiConversation implements ShouldQueue
     {
         Log::error('AI job failed after all retries', [
             'conversation_id' => $this->conversationId,
-            'error'           => $exception->getMessage(),
+            'error' => $exception->getMessage(),
         ]);
 
         // Notify user or admin about failure

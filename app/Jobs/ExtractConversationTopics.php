@@ -15,6 +15,7 @@ class ExtractConversationTopics implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $tries = 2;
+
     public int $backoff = 3;
 
     /**
@@ -22,8 +23,7 @@ class ExtractConversationTopics implements ShouldQueue
      */
     public function __construct(
         public int $conversationId
-    ) {
-    }
+    ) {}
 
     /**
      * Execute the job.
@@ -32,7 +32,7 @@ class ExtractConversationTopics implements ShouldQueue
     {
         try {
             $conversation = Conversation::findOrFail($this->conversationId);
-            $topics       = $conversation->extractTopics();
+            $topics = $conversation->extractTopics();
 
             // Store topics in cache for quick retrieval
             cache()->put(
@@ -43,12 +43,12 @@ class ExtractConversationTopics implements ShouldQueue
 
             Log::channel('ai')->info('Conversation topics extracted successfully', [
                 'conversation_id' => $this->conversationId,
-                'topics'          => $topics,
+                'topics' => $topics,
             ]);
         } catch (\Exception $e) {
             Log::channel('ai')->error('Failed to extract conversation topics', [
                 'conversation_id' => $this->conversationId,
-                'error'           => $e->getMessage(),
+                'error' => $e->getMessage(),
             ]);
 
             throw $e;

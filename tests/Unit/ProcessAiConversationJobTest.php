@@ -1,5 +1,7 @@
 <?php
+
 // tests/Unit/ProcessAiConversationJobTest.php
+
 namespace Tests\Unit;
 
 use App\Jobs\ProcessAiConversation;
@@ -22,17 +24,17 @@ class ProcessAiConversationJobTest extends TestCase
         config(['ai.use_mock' => true]);
 
         // Arrange
-        $user         = User::factory()->create();
+        $user = User::factory()->create();
         $conversation = Conversation::factory()->create([
             'user_id' => $user->id,
-            'status'  => 'active',
+            'status' => 'active',
         ]);
 
         // Create user message BEFORE job runs (matching real flow in controller)
         \App\Models\AiMessage::create([
             'conversation_id' => $conversation->id,
-            'role'            => 'user',
-            'content'         => 'Test message',
+            'role' => 'user',
+            'content' => 'Test message',
         ]);
 
         // Act - Job will use MockOpenAIService due to config
@@ -46,14 +48,14 @@ class ProcessAiConversationJobTest extends TestCase
         // User message should already exist (created above)
         $this->assertDatabaseHas('ai_messages', [
             'conversation_id' => $conversation->id,
-            'role'            => 'user',
-            'content'         => 'Test message',
+            'role' => 'user',
+            'content' => 'Test message',
         ]);
 
         // Assistant message should be created by job
         $this->assertDatabaseHas('ai_messages', [
             'conversation_id' => $conversation->id,
-            'role'            => 'assistant',
+            'role' => 'assistant',
         ]);
     }
 
@@ -83,7 +85,7 @@ class ProcessAiConversationJobTest extends TestCase
         config(['ai.use_mock' => true]);
 
         // Arrange
-        $user         = User::factory()->create();
+        $user = User::factory()->create();
         $conversation = Conversation::factory()->create(['user_id' => $user->id]);
 
         // Mock the service to throw exception

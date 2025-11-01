@@ -1,9 +1,11 @@
 <?php
+
 // app/Services/MockOpenAIService.php
+
 namespace App\Services;
 
-use App\Models\Conversation;
 use App\Models\AiMessage;
+use App\Models\Conversation;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
@@ -19,18 +21,20 @@ use Illuminate\Support\Facades\Log;
  */
 class MockOpenAIService implements AiServiceInterface
 {
-    private string $model      = 'llama-3.3-70b-versatile'; // Match Groq default
+    private string $model = 'llama-3.3-70b-versatile'; // Match Groq default
+
     private float $temperature = 0.3;
-    private int $maxTokens     = 1500;
+
+    private int $maxTokens = 1500;
 
     public function __construct(
-        ?string $model      = null,
+        ?string $model = null,
         ?float $temperature = null,
-        ?int $maxTokens     = null
+        ?int $maxTokens = null
     ) {
-        $this->model       = $model ?? session('ai_model', $this->model);
+        $this->model = $model ?? session('ai_model', $this->model);
         $this->temperature = $temperature ?? session('ai_temperature', $this->temperature);
-        $this->maxTokens   = $maxTokens ?? session('ai_max_tokens', $this->maxTokens);
+        $this->maxTokens = $maxTokens ?? session('ai_max_tokens', $this->maxTokens);
     }
 
     /**
@@ -41,17 +45,18 @@ class MockOpenAIService implements AiServiceInterface
         $startTime = microtime(true);
 
         // Check cache first
-        $cacheKey  = $this->getCacheKey($conversation->id, $userMessage);
-        $cached    = Cache::get($cacheKey);
+        $cacheKey = $this->getCacheKey($conversation->id, $userMessage);
+        $cached = Cache::get($cacheKey);
 
         if ($cached) {
             Log::channel('ai')->info('Mock AI response served from cache', [
                 'conversation_id' => $conversation->id,
-                'duration_ms'     => round((microtime(true) - $startTime) * 1000, 2),
+                'duration_ms' => round((microtime(true) - $startTime) * 1000, 2),
             ]);
+
             return [
                 'response' => $cached['response'],
-                'usage'    => ['cached' => true, 'prompt_tokens' => 0, 'completion_tokens' => 0, 'total_tokens' => 0],
+                'usage' => ['cached' => true, 'prompt_tokens' => 0, 'completion_tokens' => 0, 'total_tokens' => 0],
             ];
         }
 
@@ -59,20 +64,20 @@ class MockOpenAIService implements AiServiceInterface
         $response = $this->generateMockResponse($userMessage, $conversation);
 
         // Estimate token counts
-        $promptTokens     = $this->estimateTokens($userMessage);
+        $promptTokens = $this->estimateTokens($userMessage);
         $completionTokens = $this->estimateTokens($response);
-        $usage            = [
-            'prompt_tokens'     => $promptTokens,
+        $usage = [
+            'prompt_tokens' => $promptTokens,
             'completion_tokens' => $completionTokens,
-            'total_tokens'      => $promptTokens + $completionTokens,
+            'total_tokens' => $promptTokens + $completionTokens,
         ];
 
         // Store AI response
         AiMessage::create([
             'conversation_id' => $conversation->id,
-            'role'            => 'assistant',
-            'content'         => $response,
-            'token_count'     => $usage['completion_tokens'],
+            'role' => 'assistant',
+            'content' => $response,
+            'token_count' => $usage['completion_tokens'],
         ]);
 
         // Cache response
@@ -82,15 +87,15 @@ class MockOpenAIService implements AiServiceInterface
 
         Log::channel('ai')->info('Mock AI response generated', [
             'conversation_id' => $conversation->id,
-            'model'           => $this->model . ' (MOCK)',
-            'tokens_used'     => $usage['total_tokens'],
-            'duration_ms'     => $duration,
-            'cost_usd'        => 0.0, // Mock is free!
+            'model' => $this->model.' (MOCK)',
+            'tokens_used' => $usage['total_tokens'],
+            'duration_ms' => $duration,
+            'cost_usd' => 0.0, // Mock is free!
         ]);
 
         return [
             'response' => $response,
-            'usage'    => $usage,
+            'usage' => $usage,
         ];
     }
 
@@ -139,10 +144,10 @@ class MockOpenAIService implements AiServiceInterface
         $messageCount = $conversation->messages()->count();
 
         if ($messageCount <= 2) {
-            return "Thanks for your message! 😊\n\n**Mock AI Response:** I understand you said: \"" . substr($userMessage, 0, 100) . (strlen($userMessage) > 100 ? '...' : '') . "\"\n\nIn real mode with OpenAI API, I would provide a detailed, contextual response here. For now, I'm simulating responses to help you test the chat interface.\n\n**This mock service allows you to:**\n- Test all UI features without API costs\n- Verify conversation flow\n- Demo to stakeholders\n- Develop and debug the frontend\n\nReady to switch to real AI? Just add OpenAI credit! 💳";
+            return "Thanks for your message! 😊\n\n**Mock AI Response:** I understand you said: \"".substr($userMessage, 0, 100).(strlen($userMessage) > 100 ? '...' : '')."\"\n\nIn real mode with OpenAI API, I would provide a detailed, contextual response here. For now, I'm simulating responses to help you test the chat interface.\n\n**This mock service allows you to:**\n- Test all UI features without API costs\n- Verify conversation flow\n- Demo to stakeholders\n- Develop and debug the frontend\n\nReady to switch to real AI? Just add OpenAI credit! 💳";
         }
 
-        return "I've received your message: \"" . substr($userMessage, 0, 150) . (strlen($userMessage) > 150 ? '...' : '') . "\"\n\n**Mock Response #" . ($messageCount + 1) . "**\n\nThis is a simulated AI response for testing purposes. The conversation is being saved correctly, and all features are working!\n\n**Try testing:**\n- Generate Summary button\n- Extract Topics\n- Export conversation\n- Create new conversations\n\nOnce connected to real OpenAI, responses will be intelligent and contextual. For now, enjoy the mock experience! 🎭";
+        return "I've received your message: \"".substr($userMessage, 0, 150).(strlen($userMessage) > 150 ? '...' : '')."\"\n\n**Mock Response #".($messageCount + 1)."**\n\nThis is a simulated AI response for testing purposes. The conversation is being saved correctly, and all features are working!\n\n**Try testing:**\n- Generate Summary button\n- Extract Topics\n- Export conversation\n- Create new conversations\n\nOnce connected to real OpenAI, responses will be intelligent and contextual. For now, enjoy the mock experience! 🎭";
     }
 
     /**
@@ -167,7 +172,7 @@ class MockOpenAIService implements AiServiceInterface
      */
     private function getCacheKey(int $conversationId, string $userMessage): string
     {
-        return 'mock_ai_response:' . md5($conversationId . ':' . $userMessage);
+        return 'mock_ai_response:'.md5($conversationId.':'.$userMessage);
     }
 
     /**
@@ -181,7 +186,7 @@ class MockOpenAIService implements AiServiceInterface
         $words = explode(' ', $context);
         $title = implode(' ', array_slice($words, 0, 6));
 
-        return strlen($title) > 50 ? substr($title, 0, 50) . '...' : $title;
+        return strlen($title) > 50 ? substr($title, 0, 50).'...' : $title;
     }
 
     /**
@@ -191,7 +196,7 @@ class MockOpenAIService implements AiServiceInterface
     {
         Log::channel('ai')->info('Mock: Generating conversation summary');
 
-        return "📝 **Mock Summary**: This is a simulated conversation summary. The actual conversation contains various messages discussing different topics. In production with real AI, this would be an intelligent, context-aware summary of the key points discussed.";
+        return '📝 **Mock Summary**: This is a simulated conversation summary. The actual conversation contains various messages discussing different topics. In production with real AI, this would be an intelligent, context-aware summary of the key points discussed.';
     }
 
     /**
@@ -232,7 +237,7 @@ class MockOpenAIService implements AiServiceInterface
 
         // Simple keyword extraction for mock
         $keywords = [];
-        $text     = strtolower($conversationText);
+        $text = strtolower($conversationText);
 
         // Common tech/programming keywords
         $techKeywords = ['laravel', 'php', 'javascript', 'react', 'database', 'api', 'code', 'development'];

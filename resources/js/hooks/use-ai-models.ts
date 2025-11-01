@@ -39,10 +39,9 @@ export function useAIModels(): UseAIModelsReturn {
         fetchModels();
     }, []);
 
+    // Backend already filters enabled models, so all returned models are available
     const availableModels = models
-        ? (Object.keys(models.models) as AIModelName[]).filter(
-            key => models.models[key].enabled
-          )
+        ? (Object.keys(models.models) as AIModelName[])
         : [];
 
     return {

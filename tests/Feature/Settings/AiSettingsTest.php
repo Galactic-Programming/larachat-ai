@@ -10,7 +10,7 @@ it('displays AI settings page for authenticated users', function () {
 
     $response->assertOk();
     $response->assertInertia(
-        fn($page) => $page
+        fn ($page) => $page
             ->component('settings/ai-settings')
             ->has('settings')
             ->has('settings.model')
@@ -88,7 +88,7 @@ it('uses default settings when no session values exist', function () {
     $response = $this->actingAs($user)->get('/settings/ai');
 
     $response->assertInertia(
-        fn($page) => $page
+        fn ($page) => $page
             ->where('settings.model', config('ai.default_model'))
             ->where('settings.temperature', config('ai.temperature.default'))
             ->where('settings.max_tokens', 1500)
@@ -108,7 +108,7 @@ it('loads saved settings from session', function () {
     $response = $this->actingAs($user)->get('/settings/ai');
 
     $response->assertInertia(
-        fn($page) => $page
+        fn ($page) => $page
             ->where('settings.model', 'llama-3.1-70b-versatile')
             ->where('settings.temperature', 0.8)
             ->where('settings.max_tokens', 3000)

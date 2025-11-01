@@ -1,4 +1,5 @@
 <?php
+
 // routes/api.php
 use App\Http\Controllers\AiChatController;
 use Illuminate\Support\Facades\Route;
@@ -24,7 +25,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/ai/models', function () {
         return response()->json([
             'default_model' => config('ai.default_model'),
-            'models' => collect(config('ai.models'))->filter(fn($model) => $model['enabled'])->toArray(),
+            'models' => collect(config('ai.models'))->filter(fn ($model) => $model['enabled'])->toArray(),
         ]);
     });
 });

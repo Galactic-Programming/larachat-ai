@@ -15,9 +15,9 @@ class AiSettingsController extends Controller
     public function index(): Response
     {
         $settings = [
-            'model'       => session('ai_model', config('ai.default_model')),
+            'model' => session('ai_model', config('ai.default_model')),
             'temperature' => session('ai_temperature', config('ai.temperature.default', 0.3)),
-            'max_tokens'  => session('ai_max_tokens', 1500),
+            'max_tokens' => session('ai_max_tokens', 1500),
         ];
 
         return Inertia::render('settings/ai-settings', [
@@ -45,16 +45,16 @@ class AiSettingsController extends Controller
         }
 
         $validated = $request->validate([
-            'model'       => 'required|string|in:' . implode(',', $availableModels),
+            'model' => 'required|string|in:'.implode(',', $availableModels),
             'temperature' => 'required|numeric|min:0|max:1',
-            'max_tokens'  => 'required|integer|min:100|max:4000',
+            'max_tokens' => 'required|integer|min:100|max:4000',
         ]);
 
         // Store in session
         session([
-            'ai_model'       => $validated['model'],
+            'ai_model' => $validated['model'],
             'ai_temperature' => $validated['temperature'],
-            'ai_max_tokens'  => $validated['max_tokens'],
+            'ai_max_tokens' => $validated['max_tokens'],
         ]);
 
         return back()->with('success', 'AI settings updated successfully!');

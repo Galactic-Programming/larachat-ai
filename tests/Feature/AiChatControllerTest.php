@@ -1,5 +1,7 @@
 <?php
+
 // tests/Feature/AiChatControllerTest.php
+
 namespace Tests\Feature;
 
 use App\Models\Conversation;

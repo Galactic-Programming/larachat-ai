@@ -1,5 +1,7 @@
 <?php
+
 // app/Services/InputSanitizer.php
+
 namespace App\Services;
 
 class InputSanitizer

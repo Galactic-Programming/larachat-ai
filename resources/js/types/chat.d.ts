@@ -98,17 +98,26 @@ export interface PollConversationResponse {
 
 export interface GenerateSummaryResponse {
     success: boolean;
-    summary: string;
+    summary?: string;
+    message?: string;
+    status?: 'processing';
+    cached?: boolean;
 }
 
 export interface ExtractTopicsResponse {
     success: boolean;
-    topics: string[];
+    topics?: string[];
+    message?: string;
+    status?: 'processing';
+    cached?: boolean;
 }
 
 export interface CategorizeResponse {
     success: boolean;
-    category: string;
+    category?: string;
+    message?: string;
+    status?: 'processing';
+    cached?: boolean;
 }
 
 export interface ChatError {

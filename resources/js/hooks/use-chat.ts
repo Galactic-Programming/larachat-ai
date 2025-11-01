@@ -186,8 +186,12 @@ export function useChat({
                         }
                     }
 
-                    // Update rate limit counter
-                    if (response.data.status === 'processing') {
+                    // Update rate limit from response headers
+                    const rateLimitRemaining = response.headers['x-ratelimit-remaining'];
+                    if (rateLimitRemaining !== undefined) {
+                        setRemainingRequests(parseInt(rateLimitRemaining, 10));
+                    } else if (response.data.status === 'processing') {
+                        // Fallback: decrement if header not available
                         setRemainingRequests((prev) => Math.max(0, prev - 1));
                     }
                 }

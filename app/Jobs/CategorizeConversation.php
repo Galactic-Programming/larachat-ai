@@ -15,6 +15,7 @@ class CategorizeConversation implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $tries = 2;
+
     public int $backoff = 3;
 
     /**
@@ -22,8 +23,7 @@ class CategorizeConversation implements ShouldQueue
      */
     public function __construct(
         public int $conversationId
-    ) {
-    }
+    ) {}
 
     /**
      * Execute the job.
@@ -43,12 +43,12 @@ class CategorizeConversation implements ShouldQueue
 
             Log::channel('ai')->info('Conversation categorized successfully', [
                 'conversation_id' => $this->conversationId,
-                'category'        => $category,
+                'category' => $category,
             ]);
         } catch (\Exception $e) {
             Log::channel('ai')->error('Failed to categorize conversation', [
                 'conversation_id' => $this->conversationId,
-                'error'           => $e->getMessage(),
+                'error' => $e->getMessage(),
             ]);
 
             throw $e;
