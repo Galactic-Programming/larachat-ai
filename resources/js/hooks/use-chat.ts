@@ -241,7 +241,18 @@ export function useChat({
                     return prevMessages;
                 });
 
+                // Update status state
                 setStatus(data.status);
+
+                // CRITICAL: Also update conversation object so ChatHeader sees the new status
+                setConversation((prevConv) => {
+                    if (!prevConv) return prevConv;
+                    return {
+                        ...prevConv,
+                        status: data.status,
+                        messages: data.messages,
+                    };
+                });
             }
         },
         [], // NO DEPENDENCIES - completely stable!

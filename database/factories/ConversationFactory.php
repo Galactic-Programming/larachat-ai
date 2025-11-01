@@ -11,8 +11,8 @@ class ConversationFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'title' => $this->faker->sentence(),
-            'status' => 'active',
+            'title'   => $this->faker->sentence(),
+            'status'  => 'active',
         ];
     }
 }

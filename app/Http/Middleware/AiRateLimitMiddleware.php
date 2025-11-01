@@ -26,7 +26,7 @@ class AiRateLimitMiddleware
 
         if (!$executed) {
             return response()->json([
-                'error' => 'Too many AI requests. Please slow down.',
+                'error'       => 'Too many AI requests. Please slow down.',
                 'retry_after' => RateLimiter::availableIn($key),
             ], 429);
         }

@@ -8,12 +8,24 @@ export type MessageRole = 'user' | 'assistant' | 'system';
 
 export type ConversationStatus = 'active' | 'processing' | 'completed' | 'error';
 
-export type AIModelName = 'gpt-4.1-nano' | 'gpt-4o-mini' | 'gpt-4o' | 'gpt-4-turbo';
+// Groq FREE Models
+export type AIModelName =
+    | 'llama-3.3-70b-versatile'              // Recommended: Best overall
+    | 'llama-3.1-70b-versatile'              // Stable and fast
+    | 'llama3-groq-70b-8192-tool-use-preview' // Function calling
+    | 'mixtral-8x7b-32768'                   // Ultra-fast, large context
+    | 'gemma2-9b-it'                         // Lightweight
+    // Legacy OpenAI models (disabled)
+    | 'gpt-4.1-nano'
+    | 'gpt-4o-mini'
+    | 'gpt-4o'
+    | 'gpt-4-turbo';
 
 export interface AIModel {
     name: string;
     description: string;
     enabled: boolean;
+    provider?: string;  // 'Groq' or 'OpenAI'
     pricing?: {
         input: number;  // per 1K tokens
         output: number; // per 1K tokens

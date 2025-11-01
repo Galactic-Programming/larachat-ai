@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use OpenAI\Laravel\Facades\OpenAI;
 use Illuminate\Support\Facades\Log;
 
 class Conversation extends Model
@@ -42,7 +41,7 @@ class Conversation extends Model
             ->orderBy('created_at', 'asc')
             ->get()
             ->map(fn($message) => [
-                'role' => $message->role,
+                'role'    => $message->role,
                 'content' => $message->content,
             ])
             ->toArray();
@@ -68,33 +67,22 @@ class Conversation extends Model
             $context = $messages->map(fn($msg) => $msg->content)->join(' ');
 
             try {
-                $result = OpenAI::chat()->create([
-                    'model' => 'gpt-4.1-nano', // Testing Laravel demo model
-                    'messages' => [
-                        [
-                            'role' => 'system',
-                            'content' => 'Generate a short, concise title (max 6 words) for this conversation. Return only the title, no quotes or extra text.',
-                        ],
-                        [
-                            'role' => 'user',
-                            'content' => "Conversation excerpt: {$context}",
-                        ],
-                    ],
-                    'max_tokens' => 20,
-                    'temperature' => 0.7,
-                ]);
+                // Use AI Service based on config
+                $aiService = config('ai.use_mock', false)
+                    ? app(\App\Services\MockOpenAIService::class)
+                    : app(\App\Services\OpenAIService::class);
 
-                $title = trim($result->choices[0]->message->content, '"\'');
+                $title = $aiService->generateTitle($context);
                 $this->update(['title' => substr($title, 0, 100)]);
 
                 Log::channel('ai')->info('Auto-generated conversation title', [
                     'conversation_id' => $this->id,
-                    'title' => $title,
+                    'title'           => $title,
                 ]);
             } catch (\Exception $e) {
                 Log::channel('ai')->error('Failed to auto-generate title', [
                     'conversation_id' => $this->id,
-                    'error' => $e->getMessage(),
+                    'error'           => $e->getMessage(),
                 ]);
             }
         }
@@ -120,34 +108,23 @@ class Conversation extends Model
         })->join("\n");
 
         try {
-            $result = OpenAI::chat()->create([
-                'model' => 'gpt-4.1-nano', // Testing Laravel demo model
-                'messages' => [
-                    [
-                        'role' => 'system',
-                        'content' => 'Summarize this conversation in 2-3 concise sentences. Focus on the main topics discussed and key points.',
-                    ],
-                    [
-                        'role' => 'user',
-                        'content' => "Conversation:\n{$conversation}",
-                    ],
-                ],
-                'max_tokens' => 150,
-                'temperature' => 0.5,
-            ]);
+            // Use AI Service based on config
+            $aiService = config('ai.use_mock', false)
+                ? app(\App\Services\MockOpenAIService::class)
+                : app(\App\Services\OpenAIService::class);
 
-            $summary = $result->choices[0]->message->content;
+            $summary = $aiService->generateSummary($conversation);
 
             Log::channel('ai')->info('Generated conversation summary', [
                 'conversation_id' => $this->id,
-                'message_count' => $messages->count(),
+                'message_count'   => $messages->count(),
             ]);
 
             return $summary;
         } catch (\Exception $e) {
             Log::channel('ai')->error('Failed to generate summary', [
                 'conversation_id' => $this->id,
-                'error' => $e->getMessage(),
+                'error'           => $e->getMessage(),
             ]);
 
             return 'Unable to generate summary at this time.';
@@ -172,34 +149,23 @@ class Conversation extends Model
         $context = $messages->map(fn($msg) => $msg->content)->join(' ');
 
         try {
-            $result = OpenAI::chat()->create([
-                'model' => 'gpt-4.1-nano', // Testing Laravel demo model
-                'messages' => [
-                    [
-                        'role' => 'system',
-                        'content' => 'Categorize this conversation into ONE of these categories: Tech, Programming, Personal, Work, Education, Creative, Other. Return only the category name.',
-                    ],
-                    [
-                        'role' => 'user',
-                        'content' => "Conversation: {$context}",
-                    ],
-                ],
-                'max_tokens' => 10,
-                'temperature' => 0.3,
-            ]);
+            // Use AI Service based on config
+            $aiService = config('ai.use_mock', false)
+                ? app(\App\Services\MockOpenAIService::class)
+                : app(\App\Services\OpenAIService::class);
 
-            $category = trim($result->choices[0]->message->content);
+            $category = $aiService->categorize($context);
 
             Log::channel('ai')->info('Categorized conversation', [
                 'conversation_id' => $this->id,
-                'category' => $category,
+                'category'        => $category,
             ]);
 
             return $category;
         } catch (\Exception $e) {
             Log::channel('ai')->error('Failed to categorize conversation', [
                 'conversation_id' => $this->id,
-                'error' => $e->getMessage(),
+                'error'           => $e->getMessage(),
             ]);
 
             return 'General';
@@ -223,35 +189,23 @@ class Conversation extends Model
         $conversation = $messages->map(fn($msg) => $msg->content)->join(' ');
 
         try {
-            $result = OpenAI::chat()->create([
-                'model' => 'gpt-4.1-nano', // Testing Laravel demo model
-                'messages' => [
-                    [
-                        'role' => 'system',
-                        'content' => 'Extract 3-5 key topics from this conversation. Return as comma-separated list. Be concise.',
-                    ],
-                    [
-                        'role' => 'user',
-                        'content' => "Conversation: {$conversation}",
-                    ],
-                ],
-                'max_tokens' => 50,
-                'temperature' => 0.5,
-            ]);
+            // Use AI Service based on config
+            $aiService = config('ai.use_mock', false)
+                ? app(\App\Services\MockOpenAIService::class)
+                : app(\App\Services\OpenAIService::class);
 
-            $topicsString = $result->choices[0]->message->content;
-            $topics = array_map('trim', explode(',', $topicsString));
+            $topics = $aiService->extractTopics($conversation);
 
             Log::channel('ai')->info('Extracted conversation topics', [
                 'conversation_id' => $this->id,
-                'topics' => $topics,
+                'topics'          => $topics,
             ]);
 
             return $topics;
         } catch (\Exception $e) {
             Log::channel('ai')->error('Failed to extract topics', [
                 'conversation_id' => $this->id,
-                'error' => $e->getMessage(),
+                'error'           => $e->getMessage(),
             ]);
 
             return [];

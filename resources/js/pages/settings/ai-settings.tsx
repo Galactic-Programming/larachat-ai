@@ -97,16 +97,17 @@ export default function AiSettings({ settings }: Props) {
                                     const modelInfo = getModelInfo(modelKey);
                                     return (
                                         <option key={modelKey} value={modelKey}>
-                                            {modelInfo?.name || modelKey} - {modelInfo?.description || ''}
+                                            {modelInfo?.name || modelKey}
+                                            {modelInfo?.description && ` - ${modelInfo.description}`}
                                         </option>
                                     );
                                 })
                             ) : (
                                 <>
-                                    <option value="gpt-4.1-nano">GPT-4.1 Nano (Laravel Demo - Testing)</option>
-                                    <option value="gpt-4o-mini">GPT-4o Mini (Fast & Cost-effective)</option>
-                                    <option value="gpt-4o">GPT-4o (Advanced)</option>
-                                    <option value="gpt-4-turbo">GPT-4 Turbo (Most Capable)</option>
+                                    <option value="llama-3.3-70b-versatile">Llama 3.3 70B Versatile (Recommended)</option>
+                                    <option value="llama-3.1-70b-versatile">Llama 3.1 70B Versatile (Fast)</option>
+                                    <option value="mixtral-8x7b-32768">Mixtral 8x7B (Ultra-fast)</option>
+                                    <option value="gemma2-9b-it">Gemma 2 9B (Lightweight)</option>
                                 </>
                             )}
                         </select>
@@ -169,27 +170,27 @@ export default function AiSettings({ settings }: Props) {
                     {/* Recommendations */}
                     <div className="rounded-md border border-blue-200 bg-blue-50 p-4 dark:border-blue-900/50 dark:bg-blue-900/20">
                         <h3 className="mb-2 font-semibold text-blue-900 dark:text-blue-100">
-                            💡 Recommended Settings
+                            💡 Recommended Settings (Groq FREE API)
                         </h3>
                         <ul className="space-y-1 text-sm text-blue-800 dark:text-blue-200">
                             <li>
-                                <strong>For precise answers:</strong> Temperature 0.1-0.3, {defaultModel || 'GPT-4o Mini'}
+                                <strong>For precise answers:</strong> Temperature 0.1-0.3, Llama 3.3 70B
                             </li>
                             <li>
-                                <strong>For creative writing:</strong> Temperature 0.7-0.9, GPT-4o
+                                <strong>For creative writing:</strong> Temperature 0.7-0.9, Llama 3.3 70B
                             </li>
                             <li>
-                                <strong>For balanced responses:</strong> Temperature 0.5, {defaultModel || 'GPT-4o Mini'}
+                                <strong>For speed:</strong> Gemma 2 9B or Mixtral 8x7B
+                            </li>
+                            <li>
+                                <strong>For function calling:</strong> Llama 3 70B Tool Use
                             </li>
                         </ul>
-                        {defaultModel === 'gpt-4.1-nano' && (
-                            <div className="mt-3 rounded border border-yellow-300 bg-yellow-50 p-2 dark:border-yellow-700 dark:bg-yellow-900/20">
-                                <p className="text-xs text-yellow-800 dark:text-yellow-200">
-                                    <strong>Note:</strong> Currently testing GPT-4.1 Nano (Laravel demo model).
-                                    This model may be beta/partner-only.
-                                </p>
-                            </div>
-                        )}
+                        <div className="mt-3 rounded border border-green-300 bg-green-50 p-2 dark:border-green-700 dark:bg-green-900/20">
+                            <p className="text-xs text-green-800 dark:text-green-200">
+                                <strong>✨ All models are FREE!</strong> Powered by Groq's ultra-fast inference.
+                            </p>
+                        </div>
                     </div>
 
                     {/* Save Button */}

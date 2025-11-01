@@ -21,9 +21,9 @@ class AiMessageFactory extends Factory
 
         return [
             'conversation_id' => Conversation::factory(),
-            'role' => $this->faker->randomElement(['user', 'assistant']),
-            'content' => $content,
-            'token_count' => (int) ceil(strlen($content) / 4), // Rough estimation
+            'role'            => $this->faker->randomElement(['user', 'assistant']),
+            'content'         => $content,
+            'token_count'     => (int) ceil(strlen($content) / 4), // Rough estimation
         ];
     }
 
