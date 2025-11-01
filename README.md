@@ -76,9 +76,6 @@ Visit `http://127.0.0.1:8000` and register to start chatting!
 - **[Foundation Complete](./docs/FOUNDATION_COMPLETE.md)** - Phase 1-4A development summary
 - **[Task #10 Summary](./docs/TASK-10-COMPLETION-SUMMARY.md)** - Final polish implementation details
 - **[AI Configuration](./docs/AI_CONFIGURATION.md)** - Groq API setup and configuration
-- **[Architecture Overview](`#architecture-overview`)** - How the application works
-- **[API Documentation](`#api-endpoints`)** - Backend API reference
-- **[Frontend Components](#frontend-structure)** - React components guide
 
 ## 🏗️ Architecture Overview
 
@@ -214,11 +211,10 @@ OPENAI_BASE_URL=https://api.groq.com/openai/v1
 
 Available models (all FREE!):
 
-- `llama-3.3-70b-versatile` - **Recommended**: Best overall, fast, versatile
-- `llama-3.1-70b-versatile` - Great for coding and analysis
-- `llama3-groq-70b-8192-tool-use-preview` - Optimized for function calling
-- `mixtral-8x7b-32768` - Ultra-fast with large context window
-- `gemma2-9b-it` - Lightweight and fast
+- `llama-3.3-70b-versatile` - **Recommended**: Best overall, fast, versatile (131K context)
+- `llama-3.1-8b-instant` - Ultra-fast responses, lightweight (131K context)
+
+**Note:** As of November 2025, only these 2 Groq models are currently working. Many others have been deprecated.
 
 ## 📝 Development Workflow
 
