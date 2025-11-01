@@ -15,9 +15,10 @@ This folder contains all documentation for the Laravel AI Chat application devel
 
 ### AI Configuration
 
-- **[AI_CONFIGURATION.md](./AI_CONFIGURATION.md)** - Groq AI API configuration and setup guide
+- **[AI_CONFIGURATION.md](./AI_CONFIGURATION.md)** - Groq AI API configuration and setup guide (updated Nov 2025)
 - **[AI_IMPROVEMENTS_SUMMARY.md](./AI_IMPROVEMENTS_SUMMARY.md)** - AI features improvements and enhancements summary
 - **[GROQ_INTEGRATION.md](./GROQ_INTEGRATION.md)** - Groq FREE API integration documentation
+- **[GROQ_MODELS_UPDATE.md](./GROQ_MODELS_UPDATE.md)** - Groq models status update (verified Nov 2025)
 - **[MOCK_SERVICE_GUIDE.md](./MOCK_SERVICE_GUIDE.md)** - Mock AI service for development/testing
 
 ### Other Documentation
@@ -31,7 +32,9 @@ This folder contains all documentation for the Laravel AI Chat application devel
 - **Backend:** Laravel 12, PHP 8.4
 - **Frontend:** React 19, TypeScript, Inertia.js v2
 - **UI:** Tailwind CSS v4, shadcn/ui components
-- **AI:** Groq API (FREE) with Llama 3.3 70B, OpenAI SDK compatibility
+- **AI:** Groq API (FREE) with 2 working models (verified Nov 2025):
+  - Llama 3.3 70B Versatile (recommended)
+  - Llama 3.1 8B Instant (ultra-fast)
 - **Testing:** Pest PHP (62 tests, 252 assertions)
 
 ## ✅ Completed Tasks (10/10)
@@ -52,9 +55,11 @@ This folder contains all documentation for the Laravel AI Chat application devel
 ### Core Features
 
 - ✅ Conversation management (CRUD operations)
-- ✅ Real-time AI chat with Llama 3.3 70B (Groq FREE API)
+- ✅ Real-time AI chat with Groq FREE API (2 working models)
 - ✅ Message history with timestamps
 - ✅ Status management (Active/Archived/Pending/Completed)
+- ✅ Clean navigation with Home button in sidebar
+- ✅ Conversation title overflow fixed (line-clamp-2)
 
 ### Search & Filter
 
@@ -189,6 +194,7 @@ All features implemented, tested, and optimized. Ready for deployment!
 
 ---
 
-**Last Updated:** October 31, 2025  
+**Last Updated:** November 1, 2025  
 **Version:** 1.0.0  
-**Status:** Complete
+**Status:** Complete  
+**AI Models Verified:** November 1, 2025 (2 working Groq models)

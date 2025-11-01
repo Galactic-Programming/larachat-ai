@@ -32,10 +32,11 @@ Quick navigation to all project documentation.
 ## 🤖 AI Features
 
 - **[AI_CONFIGURATION.md](./AI_CONFIGURATION.md)**
-  - OpenAI API setup and configuration
-  - Model selection guide
+  - Groq API setup and configuration (FREE!)
+  - Model selection guide (2 working models as of Nov 2025)
+  - Temperature and max tokens settings
   - Environment variables
-  - Rate limiting configuration
+  - Mock mode for development
 
 - **[AI_IMPROVEMENTS_SUMMARY.md](./AI_IMPROVEMENTS_SUMMARY.md)**
   - AI features enhancements
@@ -43,6 +44,13 @@ Quick navigation to all project documentation.
   - Topic extraction
   - Conversation categorization
   - Export with metadata
+
+- **[GROQ_MODELS_UPDATE.md](./GROQ_MODELS_UPDATE.md)**
+  - Complete Groq integration guide
+  - Model comparison and status (verified Nov 2025)
+  - Only 2 working models: Llama 3.3 70B & Llama 3.1 8B
+  - UI/UX improvements (title overflow fix, navigation cleanup)
+  - Testing and troubleshooting
 
 ## 💻 Code Documentation
 
@@ -71,11 +79,12 @@ docs/
 - **All Tasks:** ✅ 10/10 Complete
 - **Tests:** ✅ 62 passing (252 assertions)
 - **Build:** ✅ 8.12s (385.98 KB)
+- **AI Models:** ✅ 2 working Groq models (Nov 2025)
 - **Status:** 🚀 Production Ready
 
 ### Major Features
 
-1. Real-time AI chat with GPT-4.1-nano
+1. Real-time AI chat with Groq (Llama 3.3 70B & Llama 3.1 8B)
 2. Conversation management (CRUD)
 3. Search & filter with highlighting
 4. AI features (summary, topics, categorize)
@@ -83,13 +92,16 @@ docs/
 6. Mobile responsive design
 7. Toast notifications & modals
 8. Error boundaries & optimization
+9. Clean navigation (Home button, no confusing back button)
+10. Title overflow fixed (line-clamp-2)
 
 ### Technology Stack
 
-- **Backend:** Laravel 12, PHP 8.4, OpenAI
+- **Backend:** Laravel 12, PHP 8.4, Groq API (FREE)
 - **Frontend:** React 19, TypeScript, Inertia v2
 - **UI:** Tailwind CSS v4, shadcn/ui
 - **Testing:** Pest PHP (62 tests)
+- **AI:** Groq FREE API (2 working models)
 
 ## 🔗 External Links
 
@@ -102,6 +114,7 @@ docs/
 
 ---
 
-**Last Updated:** October 31, 2025  
+**Last Updated:** November 1, 2025  
 **Project Version:** 1.0.0  
-**Documentation Version:** 1.0.0
+**Documentation Version:** 1.1.0  
+**AI Models Verified:** November 1, 2025
