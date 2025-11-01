@@ -1,28 +1,97 @@
+# =============================================================================
+# Laravel Framework
+# =============================================================================
+
+# Composer Dependencies
+/vendor
+
+# Laravel Storage & Cache
+/storage/*.key
+/storage/pail
+/bootstrap/cache/*
+!bootstrap/cache/.gitkeep
 /.phpunit.cache
-/bootstrap/ssr
-/node_modules
+.phpunit.result.cache
+
+# Laravel Public Files
 /public/build
 /public/hot
 /public/storage
+
+# Laravel SSR
+/bootstrap/ssr
+
+# =============================================================================
+# Node.js & Frontend
+# =============================================================================
+
+# Node Modules
+/node_modules
+
+# Wayfinder Auto-generated Files
 /resources/js/actions
 /resources/js/routes
 /resources/js/wayfinder
-/storage/*.key
-/storage/pail
-/vendor
-.DS_Store
+
+# Build Logs
+npm-debug.log
+yarn-error.log
+
+# =============================================================================
+# Environment & Configuration
+# =============================================================================
+
+# Environment Files (NEVER commit .env files)
 .env
 .env.backup
 .env.production
+.env.local
+.env.*.local
+
+# Laravel Authentication
+/auth.json
+
+# =============================================================================
+# IDE & Editor Settings
+# =============================================================================
+
+# PHPStorm / IntelliJ IDEA
+/.idea
 .phpactor.json
-.phpunit.result.cache
+
+# Visual Studio Code
+/.vscode
+
+# Fleet
+/.fleet
+
+# Laravel Nova
+/.nova
+
+# Zed
+/.zed
+
+# =============================================================================
+# Operating System Files
+# =============================================================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# =============================================================================
+# Homestead & Development Tools
+# =============================================================================
+
 Homestead.json
 Homestead.yaml
-npm-debug.log
-yarn-error.log
-/auth.json
-/.fleet
-/.idea
-/.nova
-/.vscode
-/.zed
