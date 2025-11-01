@@ -61,7 +61,7 @@ function ConversationItemComponent({
                         <MessageSquare className="size-4 text-muted-foreground" />
                     </div>
                     <div className="min-w-0 flex-1">
-                        <h3 className="truncate text-sm font-semibold">
+                        <h3 className="line-clamp-2 text-sm font-semibold leading-tight">
                             <HighlightedText text={conversation.title} query={searchQuery} />
                         </h3>
                     </div>

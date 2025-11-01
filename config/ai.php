@@ -34,7 +34,7 @@ return [
     |
     */
     'models' => [
-        // GROQ FREE MODELS (Recommended)
+        // GROQ FREE MODELS (Only 2 Working - Nov 2025)
         'llama-3.3-70b-versatile' => [
             'name' => 'Llama 3.3 70B Versatile',
             'description' => '🚀 RECOMMENDED - Best overall, fast, versatile. Perfect for conversations, summaries, and general tasks.',
@@ -47,51 +47,15 @@ return [
             'enabled' => true,
             'provider' => 'Groq',
         ],
-        'llama-3.1-70b-versatile' => [
-            'name' => 'Llama 3.1 70B Versatile',
-            'description' => '⚡ Fast and reliable. Great for coding, analysis, and multi-turn conversations.',
+        'llama-3.1-8b-instant' => [
+            'name' => 'Llama 3.1 8B Instant',
+            'description' => '⚡ Ultra-fast responses. Lightweight model for quick interactions and simple tasks.',
             'pricing' => [
                 'input' => 0.00,
                 'output' => 0.00,
             ],
-            'max_tokens' => 32768,
+            'max_tokens' => 8192,
             'context_window' => 131072,
-            'enabled' => true,
-            'provider' => 'Groq',
-        ],
-        'llama3-groq-70b-8192-tool-use-preview' => [
-            'name' => 'Llama 3 70B Tool Use',
-            'description' => '🛠️ Optimized for function calling and tool use. Best for structured outputs.',
-            'pricing' => [
-                'input' => 0.00,
-                'output' => 0.00,
-            ],
-            'max_tokens' => 8192,
-            'context_window' => 8192,
-            'enabled' => true,
-            'provider' => 'Groq',
-        ],
-        'mixtral-8x7b-32768' => [
-            'name' => 'Mixtral 8x7B',
-            'description' => '💨 Ultra-fast, large context window. Great for long documents and quick responses.',
-            'pricing' => [
-                'input' => 0.00,
-                'output' => 0.00,
-            ],
-            'max_tokens' => 32768,
-            'context_window' => 32768,
-            'enabled' => true,
-            'provider' => 'Groq',
-        ],
-        'gemma2-9b-it' => [
-            'name' => 'Gemma 2 9B',
-            'description' => '⚡💡 Lightweight and fast. Perfect for simple tasks and quick responses.',
-            'pricing' => [
-                'input' => 0.00,
-                'output' => 0.00,
-            ],
-            'max_tokens' => 8192,
-            'context_window' => 8192,
             'enabled' => true,
             'provider' => 'Groq',
         ],

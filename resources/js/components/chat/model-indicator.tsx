@@ -1,7 +1,9 @@
 // resources/js/components/chat/model-indicator.tsx
 import { useAIModels } from '@/hooks/use-ai-models';
+import { usePage } from '@inertiajs/react';
 import { Sparkles } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import type { AIModelName } from '@/types/chat';
 import {
     Tooltip,
     TooltipContent,
@@ -11,12 +13,24 @@ import {
 
 export function ModelIndicator() {
     const { defaultModel, models, isLoading } = useAIModels();
+    const page = usePage();
 
-    if (isLoading || !defaultModel || !models) {
+    // Get user's selected model from global shared settings
+    const pageProps = page.props as Record<string, unknown>;
+    const aiSettings = pageProps.aiSettings as { model?: string } | undefined;
+    const userSelectedModel = aiSettings?.model as AIModelName | undefined;
+
+    // Use user's selected model if available, otherwise use default
+    const activeModelKey = userSelectedModel || defaultModel;    if (isLoading || !activeModelKey || !models) {
         return null;
     }
 
-    const currentModel = models.models[defaultModel];
+    const currentModel = models.models[activeModelKey as AIModelName];
+
+    // If model not found in available models, don't render
+    if (!currentModel) {
+        return null;
+    }
 
     return (
         <TooltipProvider>

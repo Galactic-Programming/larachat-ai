@@ -103,9 +103,7 @@ export default function AiSettings({ settings }: Props) {
                                     ) : (
                                         <>
                                             <option value="llama-3.3-70b-versatile">Llama 3.3 70B Versatile (Recommended)</option>
-                                            <option value="llama-3.1-70b-versatile">Llama 3.1 70B Versatile (Fast)</option>
-                                            <option value="mixtral-8x7b-32768">Mixtral 8x7B (Ultra-fast)</option>
-                                            <option value="gemma2-9b-it">Gemma 2 9B (Lightweight)</option>
+                                            <option value="llama-3.1-8b-instant">Llama 3.1 8B Instant (Ultra-fast)</option>
                                         </>
                                     )}
                                 </select>
@@ -172,16 +170,10 @@ export default function AiSettings({ settings }: Props) {
                                 </h3>
                                 <ul className="space-y-1 text-sm text-blue-800 dark:text-blue-200">
                                     <li>
-                                        <strong>For precise answers:</strong> Temperature 0.1-0.3, Llama 3.3 70B
+                                        <strong>For best results:</strong> Temperature 0.3-0.7, Llama 3.3 70B
                                     </li>
                                     <li>
-                                        <strong>For creative writing:</strong> Temperature 0.7-0.9, Llama 3.3 70B
-                                    </li>
-                                    <li>
-                                        <strong>For speed:</strong> Gemma 2 9B or Mixtral 8x7B
-                                    </li>
-                                    <li>
-                                        <strong>For function calling:</strong> Llama 3 70B Tool Use
+                                        <strong>For speed:</strong> Temperature 0.5, Llama 3.1 8B Instant
                                     </li>
                                 </ul>
                                 <div className="mt-3 rounded border border-green-300 bg-green-50 p-2 dark:border-green-700 dark:bg-green-900/20">

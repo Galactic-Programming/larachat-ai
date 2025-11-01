@@ -3,14 +3,13 @@ import { highlightText } from '@/lib/highlight-utils';
 interface HighlightedTextProps {
     text: string;
     query: string;
-    className?: string;
 }
 
-export function HighlightedText({ text, query, className }: HighlightedTextProps) {
+export function HighlightedText({ text, query }: HighlightedTextProps) {
     const parts = highlightText(text, query);
 
     return (
-        <span className={className}>
+        <>
             {parts.map((part, index) =>
                 part.highlight ? (
                     <mark
@@ -23,6 +22,6 @@ export function HighlightedText({ text, query, className }: HighlightedTextProps
                     <span key={index}>{part.text}</span>
                 ),
             )}
-        </span>
+        </>
     );
 }

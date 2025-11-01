@@ -28,11 +28,12 @@ export default function ChatIndex() {
     const [aiFeatureLoading, setAiFeatureLoading] = useState<
         'summary' | 'topics' | 'category' | null
     >(null);
-    const [exportMetadata, setExportMetadata] = useState<{
+    // Store metadata per conversation ID
+    const [conversationMetadata, setConversationMetadata] = useState<Record<number, {
         summary?: string;
         topics?: string[];
         category?: string;
-    }>({});
+    }>>({});
     const [summaryModalOpen, setSummaryModalOpen] = useState(false);
     const [currentSummary, setCurrentSummary] = useState('');
 
@@ -68,6 +69,11 @@ export default function ChatIndex() {
             return () => clearTimeout(timer);
         }
     }, [conversations, selectedConversationId, conversationsLoading]);
+
+    // Get current conversation metadata
+    const currentMetadata = selectedConversationId
+        ? conversationMetadata[selectedConversationId] || {}
+        : {};
 
     const handleNewConversation = async () => {
         try {
@@ -150,7 +156,13 @@ export default function ChatIndex() {
 
                 // Handle 200 OK (success with data)
                 if (response.data.success && response.data.summary) {
-                    setExportMetadata((prev) => ({ ...prev, summary: response.data.summary }));
+                    setConversationMetadata((prev) => ({
+                        ...prev,
+                        [selectedConversationId]: {
+                            ...prev[selectedConversationId],
+                            summary: response.data.summary,
+                        },
+                    }));
                     setCurrentSummary(response.data.summary!);
 
                     const cachedLabel = response.data.cached ? ' (from cache)' : '';
@@ -209,7 +221,13 @@ export default function ChatIndex() {
 
                 // Handle 200 OK (success with data)
                 if (response.data.success && response.data.topics) {
-                    setExportMetadata((prev) => ({ ...prev, topics: response.data.topics }));
+                    setConversationMetadata((prev) => ({
+                        ...prev,
+                        [selectedConversationId]: {
+                            ...prev[selectedConversationId],
+                            topics: response.data.topics,
+                        },
+                    }));
 
                     const cachedLabel = response.data.cached ? ' (from cache)' : '';
                     toast.success(`Topics extracted${cachedLabel}: ${response.data.topics!.join(', ')}`, {
@@ -263,7 +281,13 @@ export default function ChatIndex() {
 
                 // Handle 200 OK (success with data)
                 if (response.data.success && response.data.category) {
-                    setExportMetadata((prev) => ({ ...prev, category: response.data.category }));
+                    setConversationMetadata((prev) => ({
+                        ...prev,
+                        [selectedConversationId]: {
+                            ...prev[selectedConversationId],
+                            category: response.data.category,
+                        },
+                    }));
 
                     const cachedLabel = response.data.cached ? ' (from cache)' : '';
                     toast.success(`Categorized as${cachedLabel}: ${response.data.category!}`, {
@@ -290,13 +314,13 @@ export default function ChatIndex() {
 
         switch (format) {
             case 'json':
-                exportAsJSON(conversation, exportMetadata);
+                exportAsJSON(conversation, currentMetadata);
                 break;
             case 'markdown':
-                exportAsMarkdown(conversation, exportMetadata);
+                exportAsMarkdown(conversation, currentMetadata);
                 break;
             case 'text':
-                exportAsText(conversation, exportMetadata);
+                exportAsText(conversation, currentMetadata);
                 break;
         }
     };
@@ -360,8 +384,8 @@ export default function ChatIndex() {
                                     onExport={handleExport}
                                     aiFeatureLoading={aiFeatureLoading}
                                     onDelete={() => handleDeleteConversation(conversation.id)}
-                                    topics={exportMetadata.topics}
-                                    category={exportMetadata.category}
+                                    topics={currentMetadata.topics}
+                                    category={currentMetadata.category}
                                 />
                             </ErrorBoundary>
 
