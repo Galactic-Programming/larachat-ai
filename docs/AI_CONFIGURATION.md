@@ -98,8 +98,6 @@ $aiService = app(AiServiceInterface::class);
 $response = $aiService->generateResponse($message, $context);
 ```
 
-``````
-
 The system prompt defines the AI's personality and scope. Located in:
 
 **File:** app/Services/OpenAIService.php  
