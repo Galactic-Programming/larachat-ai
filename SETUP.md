@@ -4,7 +4,7 @@
 
 - PHP 8.4+
 - Composer
-- Node.js 18+
+- Node.js 20+ (recommended 22+)
 - npm or yarn
 - SQLite (default) or MySQL/PostgreSQL
 - **Groq API Key (FREE!)** - Get from [https://console.groq.com](https://console.groq.com)
@@ -120,10 +120,7 @@ php artisan serve
 Available models:
 
 - `llama-3.3-70b-versatile` - **Recommended**: Best overall, fast, versatile
-- `llama-3.1-70b-versatile` - Great for coding and analysis
-- `llama3-groq-70b-8192-tool-use-preview` - Optimized for function calling
-- `mixtral-8x7b-32768` - Ultra-fast with large context window
-- `gemma2-9b-it` - Lightweight and fast
+- `llama-3.1-8b-instant` - Fast, lower quality
 
 Change model in `.env`:
 
@@ -145,8 +142,8 @@ AI_USE_MOCK=true
 
 ```env
 QUEUE_CONNECTION=sync
+```
 
-``` note
 Jobs run immediately, no need for queue worker.
 
 **Production:**
