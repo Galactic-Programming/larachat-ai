@@ -1,17 +1,21 @@
 <?php
+
 // app/Services/OpenAIService.php
+
 namespace App\Services;
 
-use App\Models\Conversation;
 use App\Models\AiMessage;
-use OpenAI\Laravel\Facades\OpenAI;
+use App\Models\Conversation;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use OpenAI\Laravel\Facades\OpenAI;
 
-class OpenAIService
+class OpenAIService implements AiServiceInterface
 {
-    private string $model = 'gpt-4.1-nano';
+    private string $model = 'llama-3.3-70b-versatile'; // Groq default model
+
     private float $temperature = 0.3;
+
     private int $maxTokens = 1500;
 
     public function __construct(
@@ -19,8 +23,11 @@ class OpenAIService
         ?float $temperature = null,
         ?int $maxTokens = null
     ) {
-        // Priority: 1. Constructor params, 2. Session, 3. Defaults
-        $this->model = $model ?? session('ai_model', $this->model);
+        // Priority: 1. Constructor params, 2. Session, 3. Config, 4. Defaults
+        $this->model = $model
+            ?? session('ai_model')
+            ?? config('openai.default_model')
+            ?? $this->model;
         $this->temperature = $temperature ?? session('ai_temperature', $this->temperature);
         $this->maxTokens = $maxTokens ?? session('ai_max_tokens', $this->maxTokens);
     }
@@ -28,9 +35,8 @@ class OpenAIService
     /**
      * Generate AI response for a conversation
      *
-     * @param Conversation $conversation
-     * @param string $userMessage
      * @return array{response: string, usage: array}
+     *
      * @throws \Exception
      */
     public function generateResponse(Conversation $conversation, string $userMessage): array
@@ -46,6 +52,7 @@ class OpenAIService
                 'conversation_id' => $conversation->id,
                 'duration_ms' => round((microtime(true) - $startTime) * 1000, 2),
             ]);
+
             return [
                 'response' => $cached['response'],
                 'usage' => ['cached' => true, 'prompt_tokens' => 0, 'completion_tokens' => 0, 'total_tokens' => 0],
@@ -136,7 +143,7 @@ class OpenAIService
             ->limit(10)
             ->get()
             ->reverse()
-            ->map(fn($msg) => [
+            ->map(fn ($msg) => [
                 'role' => $msg->role,
                 'content' => $msg->content,
             ])
@@ -150,60 +157,147 @@ class OpenAIService
      */
     private function getCacheKey(int $conversationId, string $userMessage): string
     {
-        return 'ai_response:' . md5($conversationId . ':' . $userMessage);
-    }
-
-    /**
-     * Cache AI responses with semantic similarity matching
-     */
-    private function getCachedResponse(string $message): ?string
-    {
-        // Exact match cache (24 hours)
-        $exactCacheKey = 'ai_exact:' . md5($message);
-        if ($cached = Cache::store('ai_responses')->get($exactCacheKey)) {
-            return $cached;
-        }
-
-        // Semantic similarity cache (for similar questions)
-        // In production, use vector similarity search
-        $similarCacheKey = 'ai_similar:' . md5(substr($message, 0, 100));
-        if ($cached = Cache::store('ai_responses')->get($similarCacheKey)) {
-            return $cached;
-        }
-
-        return null;
-    }
-
-    private function cacheResponse(string $message, string $response): void
-    {
-        $exactCacheKey = 'ai_exact:' . md5($message);
-        $similarCacheKey = 'ai_similar:' . md5(substr($message, 0, 100));
-
-        // Cache exact match for 24 hours
-        Cache::store('ai_responses')->put($exactCacheKey, $response, now()->addDay());
-
-        // Cache semantic match for 12 hours
-        Cache::store('ai_responses')->put($similarCacheKey, $response, now()->addHours(12));
+        return 'ai_response:'.md5($conversationId.':'.$userMessage);
     }
 
     /**
      * Calculate estimated cost for API usage
-     * Based on model pricing (adjust as needed)
+     * Groq API is FREE - always returns $0.00
      */
     private function calculateCost(array $usage): float
     {
-        // Pricing for gpt-4.1-nano (example - adjust to actual pricing)
-        // For free tier models, cost is 0
-        $promptCostPer1k = 0.0; // Free tier
-        $completionCostPer1k = 0.0; // Free tier
+        // Groq API is completely FREE!
+        // No cost calculation needed
+        return 0.0;
+    }
 
-        // If using paid models, uncomment and adjust:
-        // $promptCostPer1k = 0.01; // GPT-4 Turbo example
-        // $completionCostPer1k = 0.03;
+    /**
+     * Generate a title for the conversation
+     */
+    public function generateTitle(string $context): string
+    {
+        try {
+            $result = OpenAI::chat()->create([
+                'model' => $this->model,
+                'messages' => [
+                    [
+                        'role' => 'system',
+                        'content' => 'Generate a short, concise title (max 6 words) for this conversation. Return only the title, no quotes or extra text.',
+                    ],
+                    [
+                        'role' => 'user',
+                        'content' => "Conversation excerpt: {$context}",
+                    ],
+                ],
+                'max_tokens' => 20,
+                'temperature' => 0.7,
+            ]);
 
-        $promptCost = ($usage['prompt_tokens'] / 1000) * $promptCostPer1k;
-        $completionCost = ($usage['completion_tokens'] / 1000) * $completionCostPer1k;
+            return trim($result->choices[0]->message->content, '"\'');
+        } catch (\Exception $e) {
+            Log::channel('ai')->error('Failed to generate title', [
+                'error' => $e->getMessage(),
+            ]);
 
-        return round($promptCost + $completionCost, 6);
+            return 'New Conversation';
+        }
+    }
+
+    /**
+     * Generate a summary of the conversation
+     */
+    public function generateSummary(string $conversationText): string
+    {
+        try {
+            $result = OpenAI::chat()->create([
+                'model' => $this->model,
+                'messages' => [
+                    [
+                        'role' => 'system',
+                        'content' => 'Summarize this conversation in 2-3 concise sentences. Focus on the main topics discussed and key points.',
+                    ],
+                    [
+                        'role' => 'user',
+                        'content' => "Conversation:\n{$conversationText}",
+                    ],
+                ],
+                'max_tokens' => 150,
+                'temperature' => 0.5,
+            ]);
+
+            return $result->choices[0]->message->content;
+        } catch (\Exception $e) {
+            Log::channel('ai')->error('Failed to generate summary', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return 'Unable to generate summary at this time.';
+        }
+    }
+
+    /**
+     * Categorize the conversation
+     */
+    public function categorize(string $context): string
+    {
+        try {
+            $result = OpenAI::chat()->create([
+                'model' => $this->model,
+                'messages' => [
+                    [
+                        'role' => 'system',
+                        'content' => 'Categorize this conversation into ONE of these categories: Tech, Programming, Personal, Work, Education, Creative, Other. Return only the category name.',
+                    ],
+                    [
+                        'role' => 'user',
+                        'content' => "Conversation: {$context}",
+                    ],
+                ],
+                'max_tokens' => 10,
+                'temperature' => 0.3,
+            ]);
+
+            return trim($result->choices[0]->message->content);
+        } catch (\Exception $e) {
+            Log::channel('ai')->error('Failed to categorize conversation', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return 'General';
+        }
+    }
+
+    /**
+     * Extract topics from the conversation
+     */
+    public function extractTopics(string $conversationText): array
+    {
+        try {
+            $result = OpenAI::chat()->create([
+                'model' => $this->model,
+                'messages' => [
+                    [
+                        'role' => 'system',
+                        'content' => 'Extract 3-5 key topics from this conversation. Return as comma-separated list. Be concise.',
+                    ],
+                    [
+                        'role' => 'user',
+                        'content' => "Conversation: {$conversationText}",
+                    ],
+                ],
+                'max_tokens' => 50,
+                'temperature' => 0.5,
+            ]);
+
+            $topicsString = $result->choices[0]->message->content;
+
+            return array_map('trim', explode(',', $topicsString));
+        } catch (\Exception $e) {
+            Log::channel('ai')->error('Failed to extract topics', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return [];
+        }
     }
 }

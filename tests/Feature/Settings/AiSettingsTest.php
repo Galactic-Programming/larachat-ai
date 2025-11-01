@@ -10,7 +10,7 @@ it('displays AI settings page for authenticated users', function () {
 
     $response->assertOk();
     $response->assertInertia(
-        fn($page) => $page
+        fn ($page) => $page
             ->component('settings/ai-settings')
             ->has('settings')
             ->has('settings.model')
@@ -30,14 +30,14 @@ it('updates AI settings successfully', function () {
     $user = User::factory()->create();
 
     $response = $this->actingAs($user)->post('/settings/ai', [
-        'model' => 'gpt-4o',
+        'model' => 'llama-3.3-70b-versatile', // Use Groq model
         'temperature' => 0.5,
         'max_tokens' => 2000,
     ]);
 
     $response->assertRedirect();
 
-    expect(session('ai_model'))->toBe('gpt-4o');
+    expect(session('ai_model'))->toBe('llama-3.3-70b-versatile');
     expect(session('ai_temperature'))->toBe(0.5);
     expect(session('ai_max_tokens'))->toBe(2000);
 });
@@ -60,7 +60,7 @@ it('requires temperature between 0 and 1', function () {
     $user = User::factory()->create();
 
     $response = $this->actingAs($user)->post('/settings/ai', [
-        'model' => 'gpt-4o-mini',
+        'model' => 'llama-3.3-70b-versatile', // Use Groq model
         'temperature' => 1.5,
         'max_tokens' => 1500,
     ]);
@@ -73,7 +73,7 @@ it('requires max_tokens between 100 and 4000', function () {
     $user = User::factory()->create();
 
     $response = $this->actingAs($user)->post('/settings/ai', [
-        'model' => 'gpt-4o-mini',
+        'model' => 'llama-3.3-70b-versatile', // Use Groq model
         'temperature' => 0.3,
         'max_tokens' => 5000,
     ]);
@@ -88,9 +88,9 @@ it('uses default settings when no session values exist', function () {
     $response = $this->actingAs($user)->get('/settings/ai');
 
     $response->assertInertia(
-        fn($page) => $page
-            ->where('settings.model', 'gpt-4o-mini')
-            ->where('settings.temperature', 0.3)
+        fn ($page) => $page
+            ->where('settings.model', config('ai.default_model'))
+            ->where('settings.temperature', config('ai.temperature.default'))
             ->where('settings.max_tokens', 1500)
     );
 });
@@ -100,7 +100,7 @@ it('loads saved settings from session', function () {
     $user = User::factory()->create();
 
     session([
-        'ai_model' => 'gpt-4-turbo',
+        'ai_model' => 'llama-3.1-70b-versatile', // Use Groq model
         'ai_temperature' => 0.8,
         'ai_max_tokens' => 3000,
     ]);
@@ -108,8 +108,8 @@ it('loads saved settings from session', function () {
     $response = $this->actingAs($user)->get('/settings/ai');
 
     $response->assertInertia(
-        fn($page) => $page
-            ->where('settings.model', 'gpt-4-turbo')
+        fn ($page) => $page
+            ->where('settings.model', 'llama-3.1-70b-versatile')
             ->where('settings.temperature', 0.8)
             ->where('settings.max_tokens', 3000)
     );

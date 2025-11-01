@@ -1,10 +1,10 @@
-# 🤖 Laravel AI Chat Application
+# 🤖 Larachat AI
 
-A modern, real-time AI chat application built with Laravel 12, React, TypeScript, and OpenAI API.
+A modern, real-time AI chat application built with Laravel 12, React, TypeScript, and **Groq FREE API**.
 
 ## ✨ Features
 
-- 💬 **Real-time AI Conversations** - Chat with AI using OpenAI's GPT models
+- 💬 **Real-time AI Conversations** - Chat with AI using Groq's FREE Llama models
 - 🔄 **Multiple Conversations** - Create and manage multiple chat threads
 - 🎯 **Smart AI Features** - Auto-generate summaries, extract topics, categorize conversations
 - 🔐 **Secure Authentication** - Laravel Sanctum SPA authentication with 2FA support
@@ -12,17 +12,18 @@ A modern, real-time AI chat application built with Laravel 12, React, TypeScript
 - 🎨 **Modern UI** - Beautiful interface with Tailwind CSS and shadcn/ui
 - 📱 **Responsive Design** - Works seamlessly on desktop and mobile
 - 🧪 **Fully Tested** - Comprehensive test suite with Pest PHP
+- 🆓 **100% FREE AI** - Powered by Groq's generous free tier
 
 ## 🛠️ Tech Stack
 
 ### Backend
 
 - **Laravel 12** - PHP framework
-- **PHP 8.2+** - Latest PHP version
+- **PHP 8.4+** - Latest PHP version
 - **SQLite/MySQL** - Database options
 - **Laravel Sanctum** - API authentication
 - **Laravel Fortify** - Authentication scaffolding
-- **OpenAI PHP SDK** - AI integration
+- **Groq API** - FREE AI integration (via OpenAI SDK compatibility)
 
 ### Frontend
 
@@ -53,8 +54,9 @@ composer install && npm install
 cp .env.example .env
 php artisan key:generate
 
-# 3. Add your OpenAI API key to .env
-# OPENAI_API_KEY=sk-...
+# 3. Add your Groq API key to .env (FREE at https://console.groq.com)
+# GROQ_API_KEY=gsk_...
+# AI_DEFAULT_MODEL=llama-3.3-70b-versatile
 
 # 4. Setup database
 touch database/database.sqlite
@@ -73,7 +75,7 @@ Visit `http://127.0.0.1:8000` and register to start chatting!
 - **[Setup Guide](./SETUP.md)** - Installation and configuration guide
 - **[Foundation Complete](./docs/FOUNDATION_COMPLETE.md)** - Phase 1-4A development summary
 - **[Task #10 Summary](./docs/TASK-10-COMPLETION-SUMMARY.md)** - Final polish implementation details
-- **[AI Configuration](./docs/AI_CONFIGURATION.md)** - OpenAI API setup and configuration
+- **[AI Configuration](./docs/AI_CONFIGURATION.md)** - Groq API setup and configuration
 - **[Architecture Overview](`#architecture-overview`)** - How the application works
 - **[API Documentation](`#api-endpoints`)** - Backend API reference
 - **[Frontend Components](#frontend-structure)** - React components guide
@@ -82,16 +84,19 @@ Visit `http://127.0.0.1:8000` and register to start chatting!
 
 ### Backend Structure
 
-``` structure
+```plaintext
 app/
 ├── Http/Controllers/
 │   └── AiChatController.php      # Main API endpoints
 ├── Services/
-│   ├── OpenAIService.php         # OpenAI integration
-│   ├── RobustOpenAIService.php   # Retry logic wrapper
-│   └── TokenBudgetManager.php    # Token usage tracking
+│   ├── AiServiceInterface.php    # Service layer interface
+│   ├── OpenAIService.php         # Groq API integration (via OpenAI SDK)
+│   └── MockOpenAIService.php     # Mock service for testing
 ├── Jobs/
-│   └── ProcessAiConversation.php # Async AI response processing
+│   ├── ProcessAiConversation.php       # Async AI response processing
+│   ├── GenerateConversationSummary.php # Summary generation
+│   ├── ExtractConversationTopics.php   # Topic extraction
+│   └── CategorizeConversation.php      # Conversation categorization
 └── Models/
     ├── Conversation.php          # Chat conversations
     ├── AiMessage.php             # Individual messages
@@ -100,7 +105,7 @@ app/
 
 ### Frontend Structure
 
-``` structure
+```plaintext
 resources/js/
 ├── pages/
 │   └── chat/
@@ -161,7 +166,7 @@ php artisan test --coverage
 ./vendor/bin/pint
 ```
 
-Current test coverage: **7 feature tests, 51 assertions** (100% passing)
+Current test coverage: **62 tests, 252 assertions** (100% passing)
 
 ## 🔧 Configuration
 
@@ -193,21 +198,27 @@ Default: 20 requests per minute per user
 
 Configure in `app/Http/Middleware/AiRateLimitMiddleware.php`
 
-### OpenAI Configuration
+### Groq AI Configuration
 
-Edit `config/openai.php` or use environment variables:
+Edit `config/ai.php` or use environment variables:
 
 ```env
-OPENAI_API_KEY=sk-...
-OPENAI_MODEL=gpt-4o-mini
-OPENAI_ORGANIZATION=org-...  # Optional
+GROQ_API_KEY=gsk_...
+AI_DEFAULT_MODEL=llama-3.3-70b-versatile
+AI_USE_MOCK=false  # Set to true for offline development
+
+# OpenAI SDK Configuration (for Groq compatibility)
+OPENAI_API_KEY=${GROQ_API_KEY}
+OPENAI_BASE_URL=https://api.groq.com/openai/v1
 ```
 
-Available models:
+Available models (all FREE!):
 
-- `gpt-4o-mini` - Fast and cheap (recommended)
-- `gpt-4o` - More capable
-- `gpt-4-turbo` - Balanced performance
+- `llama-3.3-70b-versatile` - **Recommended**: Best overall, fast, versatile
+- `llama-3.1-70b-versatile` - Great for coding and analysis
+- `llama3-groq-70b-8192-tool-use-preview` - Optimized for function calling
+- `mixtral-8x7b-32768` - Ultra-fast with large context window
+- `gemma2-9b-it` - Lightweight and fast
 
 ## 📝 Development Workflow
 
@@ -304,11 +315,12 @@ This project is open-sourced software licensed under the [MIT license](https://o
 - [Laravel](https://laravel.com) - PHP framework
 - [React](https://react.dev) - UI library
 - [Inertia.js](https://inertiajs.com) - SPA bridge
-- [OpenAI](https://openai.com) - AI models
+- [Groq](https://groq.com) - FREE ultra-fast AI inference
 - [Tailwind CSS](https://tailwindcss.com) - Styling
 - [shadcn/ui](https://ui.shadcn.com) - Components
 
 ---
 
-**Happy Chatting! 🎉**
+Happy Chatting! 🎉
+
 For questions or issues, check the logs at `storage/logs/laravel.log`

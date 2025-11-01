@@ -17,11 +17,10 @@ class ConversationSeeder extends Seeder
         // Get first user or create one for testing
         $user = User::first();
 
-        if (!$user) {
+        if (! $user) {
             $user = User::factory()->create([
                 'name' => 'Test User',
                 'email' => 'test@example.com',
-                'password' => bcrypt('password'),
             ]);
         }
 

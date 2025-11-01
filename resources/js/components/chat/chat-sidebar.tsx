@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, Search, X, Filter, ArrowUpDown } from 'lucide-react';
+import { Plus, Search, X, Filter, ArrowUpDown, Home } from 'lucide-react';
 import {
     Select,
     SelectContent,
@@ -67,10 +67,18 @@ export function ChatSidebar({
         <div className={cn('flex h-full flex-col border-r bg-muted/10', className)}>
             {/* Header */}
             <div className="border-b p-4">
-                <div className="mb-3 flex items-center justify-between">
-                    <h2 className="text-lg font-semibold">Conversations</h2>
+                <div className="mb-3 flex items-center justify-between gap-2">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-11 shrink-0"
+                        onClick={() => window.location.href = '/dashboard'}
+                        aria-label="Back to Dashboard"
+                    >
+                        <Home className="size-5" />
+                    </Button>
                     {onNewConversation && (
-                        <Button size="sm" onClick={onNewConversation} className="h-11">
+                        <Button size="sm" onClick={onNewConversation} className="h-11 flex-1">
                             <Plus className="mr-2 size-4" />
                             New
                         </Button>

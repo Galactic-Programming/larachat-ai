@@ -15,8 +15,8 @@ class AiSettingsController extends Controller
     public function index(): Response
     {
         $settings = [
-            'model' => session('ai_model', config('openai.default_model', 'gpt-4o-mini')),
-            'temperature' => session('ai_temperature', 0.3),
+            'model' => session('ai_model', config('ai.default_model')),
+            'temperature' => session('ai_temperature', config('ai.temperature.default', 0.3)),
             'max_tokens' => session('ai_max_tokens', 1500),
         ];
 
@@ -30,8 +30,22 @@ class AiSettingsController extends Controller
      */
     public function update(Request $request)
     {
+        // Get available models from config
+        $availableModels = array_keys(config('ai.models', []));
+
+        // If no models in config, use Groq FREE models as defaults
+        if (empty($availableModels)) {
+            $availableModels = [
+                'llama-3.3-70b-versatile',
+                'llama-3.1-70b-versatile',
+                'llama3-groq-70b-8192-tool-use-preview',
+                'mixtral-8x7b-32768',
+                'gemma2-9b-it',
+            ];
+        }
+
         $validated = $request->validate([
-            'model' => 'required|string|in:gpt-4o-mini,gpt-4o,gpt-4-turbo',
+            'model' => 'required|string|in:'.implode(',', $availableModels),
             'temperature' => 'required|numeric|min:0|max:1',
             'max_tokens' => 'required|integer|min:100|max:4000',
         ]);

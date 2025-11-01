@@ -12,7 +12,7 @@ interface MessageListProps {
     isProcessing?: boolean;
     className?: string;
     emptyMessage?: string;
-    conversationStatus?: 'active' | 'processing' | 'completed' | 'failed';
+    conversationStatus?: 'active' | 'processing' | 'completed' | 'error';
 }
 
 export function MessageList({
@@ -71,7 +71,7 @@ export function MessageList({
 
                 {isProcessing && <TypingIndicator />}
 
-                {conversationStatus === 'failed' && (
+                {conversationStatus === 'error' && (
                     <div className="mx-auto max-w-4xl rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-900/50 dark:bg-red-900/20">
                         <div className="flex gap-3">
                             <div className="text-red-600 dark:text-red-400">⚠️</div>

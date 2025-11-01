@@ -32,7 +32,7 @@ class AiMessageFactory extends Factory
      */
     public function user(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'role' => 'user',
         ]);
     }
@@ -42,7 +42,7 @@ class AiMessageFactory extends Factory
      */
     public function assistant(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'role' => 'assistant',
         ]);
     }
@@ -52,7 +52,7 @@ class AiMessageFactory extends Factory
      */
     public function system(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'role' => 'system',
         ]);
     }

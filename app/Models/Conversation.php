@@ -1,5 +1,7 @@
 <?php
+
 // app/Models/Conversation.php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -7,7 +9,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use OpenAI\Laravel\Facades\OpenAI;
 use Illuminate\Support\Facades\Log;
 
 class Conversation extends Model
@@ -41,7 +42,7 @@ class Conversation extends Model
         return $this->messages()
             ->orderBy('created_at', 'asc')
             ->get()
-            ->map(fn($message) => [
+            ->map(fn ($message) => [
                 'role' => $message->role,
                 'content' => $message->content,
             ])
@@ -55,7 +56,7 @@ class Conversation extends Model
     public function autoGenerateTitle(): void
     {
         // Only generate if title is generic or empty
-        if (!$this->title || str_contains(strtolower($this->title), 'new conversation')) {
+        if (! $this->title || str_contains(strtolower($this->title), 'new conversation')) {
             $messages = $this->messages()
                 ->orderBy('created_at', 'asc')
                 ->limit(3)
@@ -65,26 +66,15 @@ class Conversation extends Model
                 return;
             }
 
-            $context = $messages->map(fn($msg) => $msg->content)->join(' ');
+            $context = $messages->map(fn ($msg) => $msg->content)->join(' ');
 
             try {
-                $result = OpenAI::chat()->create([
-                    'model' => 'gpt-4.1-nano',
-                    'messages' => [
-                        [
-                            'role' => 'system',
-                            'content' => 'Generate a short, concise title (max 6 words) for this conversation. Return only the title, no quotes or extra text.',
-                        ],
-                        [
-                            'role' => 'user',
-                            'content' => "Conversation excerpt: {$context}",
-                        ],
-                    ],
-                    'max_tokens' => 20,
-                    'temperature' => 0.7,
-                ]);
+                // Use AI Service based on config
+                $aiService = config('ai.use_mock', false)
+                    ? app(\App\Services\MockOpenAIService::class)
+                    : app(\App\Services\OpenAIService::class);
 
-                $title = trim($result->choices[0]->message->content, '"\'');
+                $title = $aiService->generateTitle($context);
                 $this->update(['title' => substr($title, 0, 100)]);
 
                 Log::channel('ai')->info('Auto-generated conversation title', [
@@ -116,27 +106,17 @@ class Conversation extends Model
 
         $conversation = $messages->map(function ($msg) {
             $role = ucfirst($msg->role);
+
             return "{$role}: {$msg->content}";
         })->join("\n");
 
         try {
-            $result = OpenAI::chat()->create([
-                'model' => 'gpt-4.1-nano',
-                'messages' => [
-                    [
-                        'role' => 'system',
-                        'content' => 'Summarize this conversation in 2-3 concise sentences. Focus on the main topics discussed and key points.',
-                    ],
-                    [
-                        'role' => 'user',
-                        'content' => "Conversation:\n{$conversation}",
-                    ],
-                ],
-                'max_tokens' => 150,
-                'temperature' => 0.5,
-            ]);
+            // Use AI Service based on config
+            $aiService = config('ai.use_mock', false)
+                ? app(\App\Services\MockOpenAIService::class)
+                : app(\App\Services\OpenAIService::class);
 
-            $summary = $result->choices[0]->message->content;
+            $summary = $aiService->generateSummary($conversation);
 
             Log::channel('ai')->info('Generated conversation summary', [
                 'conversation_id' => $this->id,
@@ -169,26 +149,15 @@ class Conversation extends Model
             return 'General';
         }
 
-        $context = $messages->map(fn($msg) => $msg->content)->join(' ');
+        $context = $messages->map(fn ($msg) => $msg->content)->join(' ');
 
         try {
-            $result = OpenAI::chat()->create([
-                'model' => 'gpt-4.1-nano',
-                'messages' => [
-                    [
-                        'role' => 'system',
-                        'content' => 'Categorize this conversation into ONE of these categories: Tech, Programming, Personal, Work, Education, Creative, Other. Return only the category name.',
-                    ],
-                    [
-                        'role' => 'user',
-                        'content' => "Conversation: {$context}",
-                    ],
-                ],
-                'max_tokens' => 10,
-                'temperature' => 0.3,
-            ]);
+            // Use AI Service based on config
+            $aiService = config('ai.use_mock', false)
+                ? app(\App\Services\MockOpenAIService::class)
+                : app(\App\Services\OpenAIService::class);
 
-            $category = trim($result->choices[0]->message->content);
+            $category = $aiService->categorize($context);
 
             Log::channel('ai')->info('Categorized conversation', [
                 'conversation_id' => $this->id,
@@ -220,27 +189,15 @@ class Conversation extends Model
             return [];
         }
 
-        $conversation = $messages->map(fn($msg) => $msg->content)->join(' ');
+        $conversation = $messages->map(fn ($msg) => $msg->content)->join(' ');
 
         try {
-            $result = OpenAI::chat()->create([
-                'model' => 'gpt-4.1-nano',
-                'messages' => [
-                    [
-                        'role' => 'system',
-                        'content' => 'Extract 3-5 key topics from this conversation. Return as comma-separated list. Be concise.',
-                    ],
-                    [
-                        'role' => 'user',
-                        'content' => "Conversation: {$conversation}",
-                    ],
-                ],
-                'max_tokens' => 50,
-                'temperature' => 0.5,
-            ]);
+            // Use AI Service based on config
+            $aiService = config('ai.use_mock', false)
+                ? app(\App\Services\MockOpenAIService::class)
+                : app(\App\Services\OpenAIService::class);
 
-            $topicsString = $result->choices[0]->message->content;
-            $topics = array_map('trim', explode(',', $topicsString));
+            $topics = $aiService->extractTopics($conversation);
 
             Log::channel('ai')->info('Extracted conversation topics', [
                 'conversation_id' => $this->id,

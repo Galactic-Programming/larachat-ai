@@ -7,6 +7,9 @@ use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
+/**
+ * @method User|null user($guard = null)
+ */
 class ProfileUpdateRequest extends FormRequest
 {
     /**
@@ -16,6 +19,9 @@ class ProfileUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
+        /** @var User $user */
+        $user = $this->user();
+
         return [
             'name' => ['required', 'string', 'max:255'],
 
@@ -25,7 +31,7 @@ class ProfileUpdateRequest extends FormRequest
                 'lowercase',
                 'email',
                 'max:255',
-                Rule::unique(User::class)->ignore($this->user()->id),
+                Rule::unique(User::class)->ignore($user->id),
             ],
         ];
     }

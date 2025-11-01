@@ -15,8 +15,10 @@ This folder contains all documentation for the Laravel AI Chat application devel
 
 ### AI Configuration
 
-- **[AI_CONFIGURATION.md](./AI_CONFIGURATION.md)** - OpenAI API configuration and setup guide
+- **[AI_CONFIGURATION.md](./AI_CONFIGURATION.md)** - Groq AI API configuration and setup guide
 - **[AI_IMPROVEMENTS_SUMMARY.md](./AI_IMPROVEMENTS_SUMMARY.md)** - AI features improvements and enhancements summary
+- **[GROQ_INTEGRATION.md](./GROQ_INTEGRATION.md)** - Groq FREE API integration documentation
+- **[MOCK_SERVICE_GUIDE.md](./MOCK_SERVICE_GUIDE.md)** - Mock AI service for development/testing
 
 ### Other Documentation
 
@@ -29,7 +31,7 @@ This folder contains all documentation for the Laravel AI Chat application devel
 - **Backend:** Laravel 12, PHP 8.4
 - **Frontend:** React 19, TypeScript, Inertia.js v2
 - **UI:** Tailwind CSS v4, shadcn/ui components
-- **AI:** OpenAI GPT-4.1-nano integration
+- **AI:** Groq API (FREE) with Llama 3.3 70B, OpenAI SDK compatibility
 - **Testing:** Pest PHP (62 tests, 252 assertions)
 
 ## ✅ Completed Tasks (10/10)
@@ -50,7 +52,7 @@ This folder contains all documentation for the Laravel AI Chat application devel
 ### Core Features
 
 - ✅ Conversation management (CRUD operations)
-- ✅ Real-time AI chat with GPT-4.1-nano
+- ✅ Real-time AI chat with Llama 3.3 70B (Groq FREE API)
 - ✅ Message history with timestamps
 - ✅ Status management (Active/Archived/Pending/Completed)
 
@@ -115,7 +117,7 @@ This folder contains all documentation for the Laravel AI Chat application devel
 - Laravel 12 (latest)
 - PHP 8.4
 - MySQL/PostgreSQL
-- OpenAI PHP SDK
+- Groq API (FREE) via OpenAI PHP SDK
 - Laravel Sanctum (API auth)
 - Laravel Fortify (authentication)
 

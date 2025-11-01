@@ -6,7 +6,35 @@
 
 export type MessageRole = 'user' | 'assistant' | 'system';
 
-export type ConversationStatus = 'active' | 'processing' | 'completed' | 'failed';
+export type ConversationStatus = 'active' | 'processing' | 'completed' | 'error';
+
+// Groq FREE Models (Only 2 Working - Nov 2025)
+export type AIModelName =
+    | 'llama-3.3-70b-versatile'    // Recommended: Best overall
+    | 'llama-3.1-8b-instant'       // Ultra-fast, lightweight
+    // Legacy models (disabled)
+    | 'gpt-4.1-nano'
+    | 'gpt-4o-mini'
+    | 'gpt-4o'
+    | 'gpt-4-turbo';
+
+export interface AIModel {
+    name: string;
+    description: string;
+    enabled: boolean;
+    provider?: string;  // 'Groq' or 'OpenAI'
+    pricing?: {
+        input: number;  // per 1K tokens
+        output: number; // per 1K tokens
+    };
+    max_tokens?: number;
+    context_window?: number;
+}
+
+export interface AIModelsResponse {
+    default_model: AIModelName;
+    models: Record<AIModelName, AIModel>;
+}
 
 export interface Message {
     id: number;
@@ -67,17 +95,26 @@ export interface PollConversationResponse {
 
 export interface GenerateSummaryResponse {
     success: boolean;
-    summary: string;
+    summary?: string;
+    message?: string;
+    status?: 'processing';
+    cached?: boolean;
 }
 
 export interface ExtractTopicsResponse {
     success: boolean;
-    topics: string[];
+    topics?: string[];
+    message?: string;
+    status?: 'processing';
+    cached?: boolean;
 }
 
 export interface CategorizeResponse {
     success: boolean;
-    category: string;
+    category?: string;
+    message?: string;
+    status?: 'processing';
+    cached?: boolean;
 }
 
 export interface ChatError {
