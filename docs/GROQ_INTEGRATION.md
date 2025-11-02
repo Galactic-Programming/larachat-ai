@@ -46,7 +46,7 @@ Successfully migrated from OpenAI to **Groq FREE API**!
 
 ```env
 # Groq API Key
-OPENAI_API_KEY=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
+OPENAI_API_KEY="gsk_your_groq_api_key_here"
 
 # Groq Endpoint (OpenAI-compatible)
 OPENAI_BASE_URL=https://api.groq.com/openai/v1

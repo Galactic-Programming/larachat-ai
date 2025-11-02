@@ -40,7 +40,7 @@
 #### **2. `.env`** ✅
 
 ```env
-OPENAI_API_KEY=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
+OPENAI_API_KEY="gsk_your_groq_api_key_here"
 OPENAI_BASE_URL=https://api.groq.com/openai/v1
 OPENAI_DEFAULT_MODEL=llama-3.3-70b-versatile
 AI_USE_MOCK=false
